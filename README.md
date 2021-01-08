@@ -10,6 +10,10 @@ I previously built [level-eventstore](https://github.com/JamesKyburz/level-event
 
 By using DynamoDB with [Dynamodb Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) we can build append only logs.
 
+Although we cannot implement a strict append only log, we can order log items by when they are written.
+
+We can also use [Atomic Counters](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithItems.html#WorkingWithItems.AtomicCounters) to make sure each log item has a unique log sequence number.
+
 - Logs are saved in DynamoDB.
 - Publish / Subscribe changes using [EventBridge](https://aws.amazon.com/eventbridge/).
 
@@ -48,7 +52,15 @@ When items are written to DynamoDB they are written to the DynamoDB stream in th
 
 The lambda is then triggered which will read these `stream-tail` log items and will write back to the DynamoDB table a new item with entity `stream` and a log sequence number which an atomic counter for each log
 
+### lambda triggers
+
+- [Node.js lambda trigger](./src/trigger.js)
+- [Python lambda trigger](./src/trigger.py)
+
 ### event handlers triggered by EventBridge
+
+- [Node.js event handler example](./src/handler.js)
+- [Python event handler example](./src/handler.py)
 
 </details>
 

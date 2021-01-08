@@ -49,4 +49,13 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   }
+  ,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamesKyburz/dynamodb-logs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JamesKyburz/dynamodb-logs/issues"
+  },
+  "homepage": "https://github.com/JamesKyburz/dynamodb-logs#readme"
 }

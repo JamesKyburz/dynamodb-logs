@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "dynamodb-logs",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "lambda",
     "event-sourcing",
-    "dynamodb"
+    "dynamodb",
+    "append only",
+    "serverless",
+    "aws",
+    "lambda"
   ],
   "author": "James Kyburz <james.kyburz@gmail.com>",
   "license": "Apache-2.0",
@@ -48,8 +49,7 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  }
-  ,
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JamesKyburz/dynamodb-logs.git"

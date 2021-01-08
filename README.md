@@ -12,7 +12,9 @@ By using DynamoDB with [Dynamodb Streams](https://docs.aws.amazon.com/amazondyna
 
 Although we cannot implement a strict append only log, we can order log items by when they are written.
 
-We can also use [Atomic Counters](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithItems.html#WorkingWithItems.AtomicCounters) to make sure each log item has a unique log sequence number.
+Using a [Universally Unique Lexicographically Sortable Identifier](https://github.com/ulid/spec) when can also preserve log items when read by key.
+
+To preserve order when reading by log, we will use [Atomic Counters](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithItems.html#WorkingWithItems.AtomicCounters) - our Lambda trigger will increment these.
 
 - Logs are saved in DynamoDB.
 - Publish / Subscribe changes using [EventBridge](https://aws.amazon.com/eventbridge/).

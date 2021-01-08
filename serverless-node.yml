@@ -1,0 +1,68 @@
+service: dynamodb-logs
+
+frameworkVersion: ^2.15.0
+
+package:
+  individually: true
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-offline
+  - serverless-offline-dynamodb-streams
+
+provider:
+  name: aws
+  deploymentBucket:
+    blockPublicAccess: true
+    serverSideEncryption: AES256
+  logRetentionInDays: 5
+  tracing:
+    lambda: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTelemetryRecords
+        - xray:PutTraceSegments
+      Resource: '*'
+  lambdaHashingVersion: 20201221
+  #tags:
+  #  commit: '${env:COMMIT_ID}'
+
+custom:
+  serverless-offline-dynamodb-streams:
+    apiVersion: '2013-12-02'
+    endpoint: http://0.0.0.0:8000
+    region: us-east-1
+    accessKeyId: x
+    secretAccessKey: x
+    skipCacheInvalidation: false
+    readInterval: 1000
+
+functions:
+  trigger:
+    runtime: nodejs12.x
+    timeout: 6
+    memorySize: 128
+    handler: src/trigger.handler
+    package:
+      exclude:
+        - ./**
+        - '!./src/trigger.js'
+        - '!package.json'
+        - '!node_modules'
+    iamRoleStatementsName: ${self:service.name}-${self:provider.stage}-trigger
+    iamRoleStatementsInherit: true
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [dynamodb, StreamArn]
+          batchSize: 25
+          batchWindow: 1
+          parallelizationFactor: 4
+          bisectBatchOnFunctionError: true
+          startingPosition: LATEST
+
+resources:
+  Resources:
+    dynamodb: ${file(./dynamodb.yml)}

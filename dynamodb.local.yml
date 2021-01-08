@@ -1,0 +1,19 @@
+service: create-local-dynamodb-log-resources
+
+plugins:
+  - serverless-dynamodb-local
+
+provider:
+  name: aws
+  stage: local
+  lambdaHashingVersion: 20201221
+custom:
+  dynamodb:
+    start:
+      host: localhost
+    stages:
+      - local
+
+resources:
+  Resources:
+    dynamodb: ${file(./dynamodb.yml)}

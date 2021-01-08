@@ -1,0 +1,41 @@
+Type: AWS::DynamoDB::Table
+Properties:
+  TableName: "${opt:stage, 'local'}-dynamodb-logs"
+  BillingMode: 'PAY_PER_REQUEST'
+  AttributeDefinitions:
+    - AttributeName: pk
+      AttributeType: S
+    - AttributeName: sk
+      AttributeType: S
+    - AttributeName: logKey
+      AttributeType: S
+    - AttributeName: logSeq
+      AttributeType: N
+  KeySchema:
+    - AttributeName: pk
+      KeyType: HASH
+    - AttributeName: sk
+      KeyType: RANGE
+  GlobalSecondaryIndexes:
+    - IndexName: logStreamKeys
+      KeySchema:
+        - AttributeName: logKey
+          KeyType: HASH
+        - AttributeName: logSeq
+          KeyType: RANGE
+      Projection:
+        ProjectionType: KEYS_ONLY
+  TimeToLiveSpecification:
+    AttributeName: ttl
+    Enabled: true
+  StreamSpecification:
+    StreamViewType: NEW_IMAGE
+  SSESpecification:
+    #SSEType: AES256
+    SSEEnabled: true
+  PointInTimeRecoverySpecification:
+    PointInTimeRecoveryEnabled: true
+  Tags:
+      -
+        Key: "dynamodb-table"
+        Value: "${opt:stage, 'local'}-dynamodb-logs"

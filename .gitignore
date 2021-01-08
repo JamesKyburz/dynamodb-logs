@@ -1,0 +1,15 @@
+node_modules
+.DS_Store
+npm-debug.log
+.nyc_output
+.serverless
+s3/buckets
+.bash_history
+venv
+test-run.sh
+.idea/
+.vscode
+__pycache__
+*.pyc
+*.spec
+docs/source/.vs

@@ -1,0 +1,52 @@
+{
+  "name": "dynamodb-logs",
+  "version": "1.0.0",
+  "description": "dynamodb-logs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lambda",
+    "event-sourcing",
+    "dynamodb"
+  ],
+  "author": "James Kyburz <james.kyburz@gmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@commitlint/cli": "11.0.0",
+    "@commitlint/config-conventional": "11.0.0",
+    "aws-sdk": "2.820.0",
+    "commitizen": "4.2.2",
+    "cz-conventional-changelog": "3.3.0",
+    "husky": "4.3.7",
+    "lint-staged": "10.5.3",
+    "prettier": "2.2.1",
+    "prettier-standard": "16.4.1",
+    "serverless": "2.17.0",
+    "serverless-dynamodb-local": "0.2.39",
+    "serverless-iam-roles-per-function": "3.0.1",
+    "serverless-offline": "6.8.0",
+    "serverless-offline-dynamodb-streams": "4.2.0",
+    "serverless-python-requirements": "5.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.md": "prettier --write",
+    "**/*.md": "prettier --write",
+    "**/*.js": "prettier-standard",
+    "**/*.py": "./formatters/python.sh",
+    "**/*.sh": "./formatters/sh.sh",
+    "*.sh": "./formatters/sh.sh"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

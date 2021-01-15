@@ -76,7 +76,7 @@ The lambda is then triggered which will read these `stream-tail` log items and w
 - [python 3.8.6](https://www.python.org/downloads/release/python-386)
 - [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html)
 
-### only required to run locally in offline mode
+### required to run locally in offline mode and for linting
 
 - [docker](https://www.docker.io)
 - [docker-compose](https://docs.docker.com/compose)

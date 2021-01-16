@@ -1,6 +1,6 @@
 service: dynamodb-logs
 
-frameworkVersion: ^2.15.0
+frameworkVersion: ^2.19.0
 
 package:
   individually: true
@@ -10,7 +10,7 @@ plugins:
   - serverless-offline
   - serverless-offline-dynamodb-streams
   - serverless-python-requirements
-
+  - serverless-offline-aws-eventbridge
 provider:
   name: aws
   deploymentBucket:
@@ -47,18 +47,30 @@ custom:
       - urllib3
       - jmespath
       - dateutil
+  serverless-offline-aws-eventbridge:
+      port: 4010
+      debug: false
+      account: ''
 
 functions:
   trigger:
     runtime: python3.8
     timeout: 6
     memorySize: 128
+    environment:
+      PYTHON_ENV: "${opt:stage, 'local'}"
     handler: src/trigger.handler
     package:
       exclude:
         - ./**
         - '!src/trigger.py'
-    iamRoleStatementsName: ${self:service.name}-${self:provider.stage}-trigger
+    iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-trigger"
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "events:PutEvents"
+        Resource:
+          - "arn:#{AWS::Partition}:events:#{AWS::Region}:#}AWS::AccountId}:event-bus/dynamodb-log"
     iamRoleStatementsInherit: true
     events:
       - stream:

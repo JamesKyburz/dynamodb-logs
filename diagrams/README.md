@@ -16,5 +16,5 @@ python3 install -r requirements.txt
 # create diagrams
 
 ```sh
-./dynamodb.py
+./writes.py
 ```

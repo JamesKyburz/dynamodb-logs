@@ -1,23 +1,23 @@
-# dynamodb logs
+# dynamodb log
 
-sample repo to use dynamodb with append only logs using both Node.js and Python examples.
+sample repo to use DynamoDB with append only logs.
 
-![Process dynamodb-logs writes][diagram]
+examples contain either Node.js or Python examples.
+
+![DynamoDB table(dynamodb-logs) writes][writes]
 
 ### why?
 
-I previously built [level-eventstore](https://github.com/JamesKyburz/level-eventstore) and wanted the same benefits of append only logs, but using serverless.
+I previously built [level-eventstore] and wanted the same benefits of append only logs, but using serverless.
 
-By using DynamoDB with [Dynamodb Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html) we can build append only logs.
+By using DynamoDB with [Dynamodb Streams] we can build append only logs.
 
 Although we cannot implement a strict append only log, we can order log items by when they are written.
 
-Using a [Universally Unique Lexicographically Sortable Identifier](https://github.com/ulid/spec) when can also preserve log items when read by key.
-
-To preserve order when reading by log, we will use [Atomic Counters](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithItems.html#WorkingWithItems.AtomicCounters) - our Lambda trigger will increment these.
+Using a either a [Universally Unique Lexicographically Sortable Identifier] or a [monotic] value to preserve the item order when reading from DynamoDB.
 
 - Logs are saved in DynamoDB.
-- Publish / Subscribe changes using [EventBridge](https://aws.amazon.com/eventbridge/).
+- Publish / Subscribe changes using [EventBridge].
 
 ### how?
 
@@ -30,29 +30,26 @@ example payload written to DynamoDB
 
 ```json
 {
-  "pk": "users#12#stream#tail",
+  "pk": "users#12#stream",
   "sk": "1610121906-rnd",
   "type": "create",
   "log": "users",
-  "entity": "stream-tail",
   "payload": {
     "id": "12",
-    "name": "test"
+    "email": "test@example.com"
   }
 }
 ```
 
-- pk (partition key) is `log name#id#stream#tail`
-- sk (sort key) should be an ever increasing lexicographic value
-  suggestion would be to use [ulid](https://github.com/ulid/spec) for the sort key
-- type is the name of the event useful for event handlers
-- log name of log
-- payload must contain the id and optional extra fields
-- entity must be `stream-tail`
+- pk (partition key) is `log name#id#stream`
+- sk (sort key) should be a [lexicographic] [monotic] value, our suggestion would be to use [ulid] for the sort key.
+- type is the name of the event useful for event handlers.
+- log name of log.
+- payload should contain the id and optional extra fields.
 
 When items are written to DynamoDB they are written to the DynamoDB stream in the order they are written.
 
-The lambda is then triggered which will read these `stream-tail` log items and will write back to the DynamoDB table a new item with entity `stream` and a log sequence number which an atomic counter for each log
+The lambda is then triggered which will publish the changed keys to [EventBridge].
 
 ### lambda triggers
 
@@ -106,7 +103,7 @@ npx sls -c serverless-node.yml deploy
 npm i
 ./cli.sh
 rm -rf venv
-virtualenv venv venv
+virtualenv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
 npx sls -c serverless-python.yml deploy
@@ -155,7 +152,16 @@ export AWS_SECRET_ACCESS_KEY=x
 export AWS_DEFAULT_REGION=us-east-1
 aws dynamodb put-item \
   --table-name local-dynamodb-logs \
-  --item "{\"pk\": { \"S\": \"users#12#stream#tail\" }, \"sk\": { \"S\": \"$(date '+%s')\" }, \"entity\": { \"S\": \"stream-tail\" }, \"ttl\": { \"N\": \"$(date '+%s' -d '+4 days')\" }}" \
+  --item """
+  {
+    \"pk\": { \"S\": \"users#12#stream\" },
+    \"sk\": { \"S\": \"$(date '+%s')\" },
+    \"type\": { \"S\": \"create\" },
+    \"payload\": { \"M\": {
+      \"id\": { \"S\": \"12\"},
+      \"email\": { \"S\": \"test@example.com\"}
+    }}
+  }""" \
   --endpoint http://localhost:8000
 ```
 
@@ -178,4 +184,11 @@ docker-compose down
 
 [Apache License, Version 2.0](LICENSE)
 
-[diagram]: ./diagrams/dynamodb.png
+[writes]: ./diagrams/writes.png
+[EventBridge]: https://aws.amazon.com/eventbridge/
+[level-eventstore]: https://github.com/JamesKyburz/level-eventstore
+[DynamoDB Streams]: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html
+[Universally Unique Lexicographically Sortable Identifier]: https://github.com/ulid/spec
+[monotic]: https://en.wikipedia.org/wiki/Monotonic_function
+[lexicographic]: https://en.wikipedia.org/wiki/Lexicographic_order
+[ulid]: https://github.com/ulid/spec

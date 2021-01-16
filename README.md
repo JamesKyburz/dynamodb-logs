@@ -157,6 +157,7 @@ aws dynamodb put-item \
     \"pk\": { \"S\": \"users#12#stream\" },
     \"sk\": { \"S\": \"$(date '+%s')\" },
     \"type\": { \"S\": \"create\" },
+    \"log\": { \"S\": \"users\" },
     \"payload\": { \"M\": {
       \"id\": { \"S\": \"12\"},
       \"email\": { \"S\": \"test@example.com\"}

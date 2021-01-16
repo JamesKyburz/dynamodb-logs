@@ -137,7 +137,7 @@ npx sls --stage=local -c serverless-node.yml offline start
 ### Python
 
 ```sh
-virtualenv venv venv
+virtualenv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
 npx sls --stage=local -c serverless-python.yml offline start
@@ -185,10 +185,10 @@ docker-compose down
 [Apache License, Version 2.0](LICENSE)
 
 [writes]: ./diagrams/writes.png
-[EventBridge]: https://aws.amazon.com/eventbridge/
+[eventbridge]: https://aws.amazon.com/eventbridge/
 [level-eventstore]: https://github.com/JamesKyburz/level-eventstore
-[DynamoDB Streams]: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html
-[Universally Unique Lexicographically Sortable Identifier]: https://github.com/ulid/spec
+[dynamodb streams]: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html
+[universally unique lexicographically sortable identifier]: https://github.com/ulid/spec
 [monotic]: https://en.wikipedia.org/wiki/Monotonic_function
 [lexicographic]: https://en.wikipedia.org/wiki/Lexicographic_order
 [ulid]: https://github.com/ulid/spec

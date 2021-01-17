@@ -11,6 +11,7 @@ plugins:
   - serverless-offline-dynamodb-streams
   - serverless-python-requirements
   - serverless-offline-aws-eventbridge
+
 provider:
   name: aws
   deploymentBucket:
@@ -24,14 +25,14 @@ provider:
       Action:
         - xray:PutTelemetryRecords
         - xray:PutTraceSegments
-      Resource: '*'
+      Resource: "*"
   lambdaHashingVersion: 20201221
   #tags:
   #  commit: '${env:COMMIT_ID}'
 
 custom:
   serverless-offline-dynamodb-streams:
-    apiVersion: '2013-12-02'
+    apiVersion: "2013-12-02"
     endpoint: http://0.0.0.0:8000
     region: us-east-1
     accessKeyId: x
@@ -48,29 +49,49 @@ custom:
       - jmespath
       - dateutil
   serverless-offline-aws-eventbridge:
-      port: 4010
-      debug: false
-      account: ''
+    port: 4010
+    debug: true
+    account: ""
 
 functions:
+  eventHandler:
+    runtime: python3.8
+    timeout: 6
+    memorySize: 128
+    handler: src/handler.handler
+    environment:
+      DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
+    package:
+      exclude:
+        - ./**
+        - "!./src/handler.py"
+    events:
+      - eventBridge:
+          eventBus: "dynamodb-log"
+          pattern:
+            source:
+              - "dynamodb-log"
+            detail-type:
+              - "stream changes"
+            detail:
+              log:
+                - users
   trigger:
     runtime: python3.8
     timeout: 6
     memorySize: 128
-    environment:
-      PYTHON_ENV: "${opt:stage, 'local'}"
     handler: src/trigger.handler
     package:
       exclude:
         - ./**
-        - '!src/trigger.py'
+        - "!src/trigger.py"
     iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-trigger"
     iamRoleStatements:
       - Effect: Allow
         Action:
           - "events:PutEvents"
         Resource:
-          - "arn:#{AWS::Partition}:events:#{AWS::Region}:#}AWS::AccountId}:event-bus/dynamodb-log"
+          - "arn:#{AWS::Partition}:events:#{AWS::Region}:{#AWS::AccountId}:event-bus/dynamodb-log"
     iamRoleStatementsInherit: true
     events:
       - stream:

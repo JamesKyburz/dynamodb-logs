@@ -40,10 +40,8 @@ def handler(event, context):
         {},
     )
 
-    print(changes)
-
     config = {"api_version": "2015-10-07"}
-    if os.getenv("PYTHON_ENV", "") == "local":
+    if os.getenv("IS_OFFLINE", ""):
         config["endpoint_url"] = "http://127.0.0.1:4010"
 
     client = boto3.client("events", **config)
@@ -57,7 +55,7 @@ def handler(event, context):
                             "EventBusName": "dynamodb-log",
                             "Source": "dynamodb-log",
                             "DetailType": "stream changes",
-                            "Detail": json.dumps({"log": "log", "pk": pk}),
+                            "Detail": json.dumps({"log": log, "pk": pk}),
                         },
                         batch,
                     )

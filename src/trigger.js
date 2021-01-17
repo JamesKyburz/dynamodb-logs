@@ -15,10 +15,10 @@ exports.handler = async function trigger (event) {
 
   const eventBridge = new EventBridge({
     apiVersion: '2015-10-07',
-    ...(process.env.NODE_ENV === 'local' && { endpoint: 'http://127.0.0.1:4010' })
+    ...(process.env.IS_OFFLINE && {
+      endpoint: 'http://127.0.0.1:4010'
+    })
   })
-
-  console.log(process.env.NODE_ENV)
 
   for (const [log, keys] of Object.entries(changes)) {
     while (keys.length) {

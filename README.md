@@ -6,11 +6,11 @@ examples contain either Node.js or Python examples.
 
 DynamoDB write triggers
 
-<img src="./diagrams/writes.png" height="250" alt="DynamoDB table(dynamodb-logs) writes">
+![DynamoDB table(dynamodb-logs) writes][writes]
 
 EventBridge reads
 
-<img src="./diagrams/reads.png" height="250" alt="EventBridge DynamoDB table (dynamodb-logs)">
+![EventBridge DynamoDB table (dynamodb-logs) reads][reads]
 
 ### why?
 
@@ -204,6 +204,8 @@ docker-compose down
 
 [Apache License, Version 2.0](LICENSE)
 
+[writes]: ./diagrams/writes.png
+[reads]: ./diagrams/reads.png
 [eventbridge]: https://aws.amazon.com/eventbridge/
 [level-eventstore]: https://github.com/JamesKyburz/level-eventstore
 [dynamodb streams]: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html

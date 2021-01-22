@@ -41,6 +41,9 @@ custom:
     port: 4010
     debug: true
     account: ""
+    region: us-east-1
+    accessKeyId: x
+    secretAccessKey: x
 
 functions:
   eventHandler:

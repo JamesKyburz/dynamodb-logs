@@ -12,8 +12,7 @@ exports.handler = async function user ({ detail: { pk } }) {
   })
   const { Items } = await dynamodb
     .query({
-      //TableName: process.env.DYNAMODB_TABLE,
-      TableName: 'local-dynamodb-logs',
+      TableName: process.env.DYNAMODB_TABLE,
       KeyConditionExpression: '#pk = :pk and #sk > :sk',
       ExpressionAttributeNames: {
         '#pk': 'pk',

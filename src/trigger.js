@@ -16,7 +16,10 @@ exports.handler = async function trigger (event) {
   const eventBridge = new EventBridge({
     apiVersion: '2015-10-07',
     ...(process.env.IS_OFFLINE && {
-      endpoint: 'http://127.0.0.1:4010'
+      endpoint: 'http://127.0.0.1:4010',
+      accessKeyId: 'x',
+      secretAccessKey: 'x',
+      region: 'us-east-1'
     })
   })
 

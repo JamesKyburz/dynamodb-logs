@@ -42,7 +42,14 @@ def handler(event, context):
 
     config = {"api_version": "2015-10-07"}
     if os.getenv("IS_OFFLINE", ""):
-        config["endpoint_url"] = "http://127.0.0.1:4010"
+        config.update(
+            {
+                "endpoint_url": "http://127.0.0.1:4010",
+                "aws_access_key_id": "x",
+                "aws_secret_access_key": "x",
+                "region_name": "us-east-1",
+            }
+        )
 
     client = boto3.client("events", **config)
 

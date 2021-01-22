@@ -4,17 +4,22 @@ sample repo to use DynamoDB with append only logs.
 
 examples contain either Node.js or Python examples.
 
+DynamoDB write triggers
+
 ![DynamoDB table(dynamodb-logs) writes][writes]
+
+EventBridge reads
+
+![EventBridge DynamoDB table (dynamodb-logs) reads][reads]
 
 ### why?
 
 I previously built [level-eventstore] and wanted the same benefits of append only logs, but using serverless.
 
-By using DynamoDB with [Dynamodb Streams] we can build append only logs.
+By using DynamoDB with [DynamoDB Streams] we can build append only logs.
+Although we cannot implement a strict append only log we can order log items by when they are written.
 
-Although we cannot implement a strict append only log, we can order log items by when they are written.
-
-Using a either a [Universally Unique Lexicographically Sortable Identifier] or a [monotic] value to preserve the item order when reading from DynamoDB.
+By using a either a [Universally Unique Lexicographically Sortable Identifier] or a [monotic] value (at item level) we can preserve the item order when reading from DynamoDB.
 
 - Logs are saved in DynamoDB.
 - Publish / Subscribe changes using [EventBridge].
@@ -45,18 +50,18 @@ example payload written to DynamoDB
 - sk (sort key) should be a [lexicographic] [monotic] value, our suggestion would be to use [ulid] for the sort key.
 - type is the name of the event useful for event handlers.
 - log name of log.
-- payload should contain the id and optional extra fields.
+- payload should contain the id and any optional extra fields.
 
-When items are written to DynamoDB they are written to the DynamoDB stream in the order they are written.
+When items are written to DynamoDB they are written to the DynamoDB stream for the shard they belong to in the order they are written.
 
 The lambda is then triggered which will publish the changed keys to [EventBridge].
 
-### lambda triggers
+### example lambda triggers
 
 - [Node.js lambda trigger](./src/trigger.js)
 - [Python lambda trigger](./src/trigger.py)
 
-### event handlers triggered by EventBridge
+### example event handlers triggered by EventBridge
 
 - [Node.js event handler example](./src/handler.js)
 - [Python event handler example](./src/handler.py)
@@ -186,6 +191,7 @@ docker-compose down
 [Apache License, Version 2.0](LICENSE)
 
 [writes]: ./diagrams/writes.png
+[reads]: ./diagrams/reads.png
 [eventbridge]: https://aws.amazon.com/eventbridge/
 [level-eventstore]: https://github.com/JamesKyburz/level-eventstore
 [dynamodb streams]: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html

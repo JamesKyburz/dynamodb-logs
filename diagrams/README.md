@@ -16,5 +16,6 @@ python3 install -r requirements.txt
 # create diagrams
 
 ```sh
-./writes.py
+. venv/bin/activate
+find . -maxdepth 1 -name "*.py" -exec python {} \;
 ```

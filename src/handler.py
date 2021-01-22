@@ -19,14 +19,12 @@ def handler(event, context):
             }
         )
 
-    client = boto3.client("dynamodb", **config)
-    response = client.query(
-        TableName=os.getenv("DYNAMODB_TABLE"),
+    dynamodb = boto3.resource("dynamodb", **config)
+    table = dynamodb.Table(os.getenv("DYNAMODB_TABLE"))
+    response = table.query(
         KeyConditionExpression="#pk = :pk and #sk > :sk",
         ExpressionAttributeNames={"#pk": "pk", "#sk": "sk"},
-        ExpressionAttributeValues={":pk": {"S": pk}, ":sk": {"S": sk}},
+        ExpressionAttributeValues={":pk": pk, ":sk": sk},
     )
 
     print(json.dumps(response["Items"], indent=2))
-
-    return {}

@@ -68,6 +68,14 @@ functions:
       exclude:
         - ./**
         - "!./src/handler.py"
+    iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-event-handler"
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "dynamodb:Query"
+        Resource:
+          - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-dynamodb-logs"
+    iamRoleStatementsInherit: true
     events:
       - eventBridge:
           eventBus: "dynamodb-log"
@@ -94,7 +102,7 @@ functions:
         Action:
           - "events:PutEvents"
         Resource:
-          - "arn:#{AWS::Partition}:events:#{AWS::Region}:{#AWS::AccountId}:event-bus/dynamodb-log"
+          - !Sub "arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/dynamodb-log"
     iamRoleStatementsInherit: true
     events:
       - stream:

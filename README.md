@@ -99,7 +99,7 @@ export AWS credentials before running `cli.sh`
 ```sh
 npm i
 ./cli.sh
-npx sls -c serverless-node.yml deploy
+npx sls -c serverless-node.yml --stage dev deploy
 ```
 
 ### Python
@@ -111,7 +111,7 @@ rm -rf venv
 virtualenv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
-npx sls -c serverless-python.yml deploy
+npx sls -c serverless-python.yml --stage dev deploy
 rm -rf venv
 ```
 
@@ -119,6 +119,20 @@ Query DynamoDB
 
 ```sh
 ./cli.sh
+export AWS_DEFAULT_REGION=us-east-1
+aws dynamodb put-item \
+  --table-name local-dynamodb-logs \
+  --item """
+  {
+    \"pk\": { \"S\": \"users#12#stream\" },
+    \"sk\": { \"S\": \"$(date '+%s')\" },
+    \"type\": { \"S\": \"create\" },
+    \"log\": { \"S\": \"users\" },
+    \"payload\": { \"M\": {
+      \"id\": { \"S\": \"12\"},
+      \"email\": { \"S\": \"test@example.com\"}
+    }}
+  }"""
 npx dynamodb-query-cli \
   --region us-east-1
 ```

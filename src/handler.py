@@ -2,6 +2,7 @@
 
 import boto3
 import os
+import json
 
 
 def handler(event, context):
@@ -26,6 +27,6 @@ def handler(event, context):
         ExpressionAttributeValues={":pk": {"S": pk}, ":sk": {"S": sk}},
     )
 
-    print(response.Items)
+    print(json.dumps(response["Items"], indent=2))
 
     return {}

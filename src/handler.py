@@ -5,8 +5,8 @@ import os
 
 
 def handler(event, context):
-    print("I am here")
-    print(event)
+    pk = event["detail"]["pk"]
+    sk = "\x00"
     config = {"api_version": "2012-08-10"}
     if os.getenv("IS_OFFLINE", ""):
         config.update(
@@ -19,6 +19,13 @@ def handler(event, context):
         )
 
     client = boto3.client("dynamodb", **config)
+    response = client.query(
+        TableName=os.getenv("DYNAMODB_TABLE"),
+        KeyConditionExpression="#pk = :pk and #sk > :sk",
+        ExpressionAttributeNames={"#pk": "pk", "#sk": "sk"},
+        ExpressionAttributeValues={":pk": {"S": pk}, ":sk": {"S": sk}},
+    )
 
-    print("table", type(client.Table("dynamodb-log")))
+    print(response.Items)
+
     return {}

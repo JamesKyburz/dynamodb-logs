@@ -1,6 +1,16 @@
 const DynamoDB = require('aws-sdk/clients/dynamodb')
+const path = require('path')
+const os = require('os')
+const { stat, writeFile } = require('fs').promises
+
+const SEQUENCES_PATH = path.join(os.tmpdir(), 'sequences.json')
+
 exports.handler = async function user ({ detail: { pk } }) {
-  const sk = '\x00'
+  const sequences = (await stat(SEQUENCES_PATH).catch(f => false))
+    ? require(SEQUENCES_PATH)
+    : {}
+
+  const sk = sequences[pk] || '\x00'
   const dynamodb = new DynamoDB.DocumentClient({
     convertEmptyValues: true,
     ...(process.env.IS_OFFLINE && {
@@ -10,7 +20,7 @@ exports.handler = async function user ({ detail: { pk } }) {
       secretAccessKey: 'x'
     })
   })
-  const { Items } = await dynamodb
+  const { Items: items } = await dynamodb
     .query({
       TableName: process.env.DYNAMODB_TABLE,
       KeyConditionExpression: '#pk = :pk and #sk > :sk',
@@ -25,5 +35,12 @@ exports.handler = async function user ({ detail: { pk } }) {
     })
     .promise()
 
-  console.log(JSON.stringify({ Items }, null, 2))
+  const size = items.length
+  if (size > 0) {
+    sequences[pk] = items[size - 1]['sk']
+    console.log(JSON.stringify({ items }, null, 2))
+    await writeFile(SEQUENCES_PATH, JSON.stringify(sequences))
+  } else {
+    console.log(`no new records after ${sk}`)
+  }
 }

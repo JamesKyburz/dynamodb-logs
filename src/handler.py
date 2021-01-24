@@ -3,11 +3,22 @@
 import boto3
 import os
 import json
+import tempfile
+
+SEQUENCES_PATH = os.path.join(tempfile.gettempdir(), "sequences.json")
 
 
 def handler(event, context):
     pk = event["detail"]["pk"]
-    sk = "\x00"
+    if os.path.isfile(SEQUENCES_PATH):
+        with open(SEQUENCES_PATH) as f:
+            sequences = json.load(f)
+    else:
+        sequences = {}
+    if pk in sequences:
+        sk = sequences[pk]
+    else:
+        sk = "\x00"
     config = {"api_version": "2012-08-10"}
     if os.getenv("IS_OFFLINE", ""):
         config.update(
@@ -27,4 +38,14 @@ def handler(event, context):
         ExpressionAttributeValues={":pk": pk, ":sk": sk},
     )
 
-    print(json.dumps(response["Items"], indent=2))
+    size = len(response["Items"])
+    if size > 0:
+        items = response["Items"]
+        sequences[pk] = items[size - 1]["sk"]
+        print(json.dumps(items, indent=2))
+        with open(SEQUENCES_PATH, "w") as f:
+            f.write(json.dumps(sequences))
+
+    else:
+        print(f"no new records after {sk}")
+    print("sequences", sequences)

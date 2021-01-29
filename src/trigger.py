@@ -28,7 +28,7 @@ def handler(event, context):
         log = pk.split("#")[0]
         if not log in sum:
             sum[log] = []
-        sum[log].append(pk)
+        sum[log].append({"key": {"pk": pk, "sk": sk}})
         return sum
 
     changes = reduce(
@@ -53,21 +53,21 @@ def handler(event, context):
 
     client = boto3.client("events", **config)
 
-    for log, keys in changes.items():
-        for batch in each_slice(10, keys):
-            ret = client.put_events(
-                Entries=list(
-                    map(
-                        lambda pk: {
-                            "EventBusName": "dynamodb-log",
-                            "Source": "dynamodb-log",
-                            "DetailType": "stream changes",
-                            "Detail": json.dumps({"log": log, "pk": pk}),
-                        },
-                        batch,
-                    )
-                ),
+    for log, items in changes.items():
+        for batch in each_slice(10, items):
+            entries = list(
+                map(
+                    lambda item: {
+                        "EventBusName": "dynamodb-log",
+                        "Source": "dynamodb-log",
+                        "DetailType": "stream changes",
+                        "Detail": json.dumps({"log": log, "key": item["key"]}),
+                    },
+                    batch,
+                )
             )
+            print("put_events", entries)
+            ret = client.put_events(Entries=entries)
             if "FailedEntryCount" in ret:
                 failedCount = ret["FailedEntryCount"]
             else:

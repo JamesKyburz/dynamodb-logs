@@ -3,13 +3,11 @@ const EventBridge = require('aws-sdk/clients/eventbridge')
 exports.handler = async function trigger (event) {
   const changes = event.Records.filter(({ eventName }) =>
     ['INSERT', 'MODIFY'].includes(eventName)
-  ).reduce((sum, { dynamodb: { Keys: { pk: { S: pk } } } }) => {
+  ).reduce((sum, { dynamodb: { Keys: { pk: { S: pk }, sk: { S: sk } } } }) => {
     if (!pk.endsWith('#stream')) return sum
     const log = pk.split('#')[0]
     sum[log] = sum[log] || []
-    if (!sum[log].includes(pk)) {
-      sum[log].push(pk)
-    }
+    sum[log].push({ key: { pk, sk } })
     return sum
   }, {})
 
@@ -23,17 +21,18 @@ exports.handler = async function trigger (event) {
     })
   })
 
-  for (const [log, keys] of Object.entries(changes)) {
-    while (keys.length) {
-      const batch = keys.splice(0, 10)
+  for (const [log, items] of Object.entries(changes)) {
+    while (items.length) {
+      const batch = items.splice(0, 10)
       const params = {
-        Entries: batch.map(pk => ({
+        Entries: batch.map(({ key }) => ({
           EventBusName: 'dynamodb-log',
           Source: 'dynamodb-log',
           DetailType: 'stream changes',
-          Detail: JSON.stringify({ log, pk })
+          Detail: JSON.stringify({ log, key })
         }))
       }
+      console.log('putEvents', params)
       await eventBridge.putEvents(params).promise()
     }
   }

@@ -52,6 +52,7 @@ functions:
     memorySize: 128
     environment:
       DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
+    reservedConcurrency: 1
     handler: src/handler.handler
     package:
       exclude:

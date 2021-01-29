@@ -9,16 +9,21 @@ SEQUENCES_PATH = os.path.join(tempfile.gettempdir(), "sequences.json")
 
 
 def handler(event, context):
-    pk = event["detail"]["pk"]
+    key = event["detail"]["key"]
+    pk = key["pk"]
     if os.path.isfile(SEQUENCES_PATH):
         with open(SEQUENCES_PATH) as f:
             sequences = json.load(f)
     else:
         sequences = {}
+
     if pk in sequences:
-        sk = sequences[pk]
+        current = sequences[pk]
     else:
-        sk = "\x00"
+        current = "\x00"
+
+    print(event, sequences)
+
     config = {"api_version": "2012-08-10"}
     if os.getenv("IS_OFFLINE", ""):
         config.update(
@@ -35,17 +40,18 @@ def handler(event, context):
     response = table.query(
         KeyConditionExpression="#pk = :pk and #sk > :sk",
         ExpressionAttributeNames={"#pk": "pk", "#sk": "sk"},
-        ExpressionAttributeValues={":pk": pk, ":sk": sk},
+        ExpressionAttributeValues={":pk": pk, ":sk": current},
+        Limit=1,
     )
 
     size = len(response["Items"])
     if size > 0:
         items = response["Items"]
         sequences[pk] = items[size - 1]["sk"]
-        print(json.dumps(items, indent=2))
+        print(f"next record > {current}")
+        print(items)
         with open(SEQUENCES_PATH, "w") as f:
             f.write(json.dumps(sequences))
 
     else:
-        print(f"no new records after {sk}")
-    print("sequences", sequences)
+        print(f"no new record > {current}")

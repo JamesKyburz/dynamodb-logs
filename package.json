@@ -17,21 +17,23 @@
   "devDependencies": {
     "@commitlint/cli": "11.0.0",
     "@commitlint/config-conventional": "11.0.0",
-    "aws-sdk": "2.828.0",
     "commitizen": "4.2.3",
     "cz-conventional-changelog": "3.3.0",
     "husky": "4.3.8",
-    "lint-staged": "10.5.3",
-    "npm-check-updates": "10.2.5",
+    "lint-staged": "10.5.4",
+    "npm-check-updates": "11.1.1",
     "prettier": "2.2.1",
     "prettier-standard": "16.4.1",
-    "serverless": "2.19.0",
+    "serverless": "2.23.0",
     "serverless-dynamodb-local": "0.2.39",
-    "serverless-iam-roles-per-function": "3.0.1",
+    "serverless-iam-roles-per-function": "3.1.0",
     "serverless-offline": "6.8.0",
-    "serverless-offline-aws-eventbridge": "1.4.0",
+    "serverless-offline-aws-eventbridge": "1.4.1",
     "serverless-offline-dynamodb-streams": "4.2.0",
-    "serverless-python-requirements": "5.1.0"
+    "serverless-python-requirements": "5.1.0",
+    "serverless-webpack": "5.3.5",
+    "webpack": "5.21.2",
+    "webpack-node-externals": "2.5.2"
   },
   "husky": {
     "hooks": {
@@ -61,5 +63,10 @@
   "bugs": {
     "url": "https://github.com/JamesKyburz/dynamodb-logs/issues"
   },
-  "homepage": "https://github.com/JamesKyburz/dynamodb-logs#readme"
+  "homepage": "https://github.com/JamesKyburz/dynamodb-logs#readme",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.4.1",
+    "@aws-sdk/client-eventbridge": "3.4.1",
+    "@aws-sdk/util-dynamodb": "3.4.1"
+  }
 }

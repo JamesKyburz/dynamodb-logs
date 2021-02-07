@@ -1,4 +1,7 @@
-const EventBridge = require('aws-sdk/clients/eventbridge')
+const {
+  EventBridgeClient,
+  PutEventsCommand
+} = require('@aws-sdk/client-eventbridge')
 
 exports.handler = async function trigger (event) {
   const changes = event.Records.filter(({ eventName }) =>
@@ -11,7 +14,7 @@ exports.handler = async function trigger (event) {
     return sum
   }, {})
 
-  const eventBridge = new EventBridge({
+  const eventBridge = new EventBridgeClient({
     apiVersion: '2015-10-07',
     ...(process.env.IS_OFFLINE && {
       endpoint: 'http://127.0.0.1:4010',
@@ -33,7 +36,8 @@ exports.handler = async function trigger (event) {
         }))
       }
       console.log('putEvents', params)
-      await eventBridge.putEvents(params).promise()
+      const command = new PutEventsCommand(params)
+      await eventBridge.send(command)
     }
   }
 }

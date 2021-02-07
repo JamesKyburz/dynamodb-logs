@@ -10,6 +10,7 @@ plugins:
   - serverless-offline
   - serverless-offline-dynamodb-streams
   - serverless-offline-aws-eventbridge
+  #- serverless-webpack
 provider:
   name: aws
   deploymentBucket:
@@ -25,10 +26,17 @@ provider:
         - xray:PutTraceSegments
       Resource: "*"
   lambdaHashingVersion: 20201221
+  #environment:
+  #  AWS_CSM_ENABLED: true
+  #  AWS_CSM_PORT: 31000
+  #  AWS_CSM_HOST: 0.0.0.0
   #tags:
   #  commit: '${env:COMMIT_ID}'
 
 custom:
+  #webpack:
+  #  webpackConfig: ./webpack.config.js
+  #  includeModules: true
   serverless-offline-dynamodb-streams:
     apiVersion: "2013-12-02"
     endpoint: http://0.0.0.0:8000
@@ -47,7 +55,7 @@ custom:
 
 functions:
   eventHandler:
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     environment:
@@ -59,7 +67,7 @@ functions:
         - ./**
         - "!./src/handler.js"
         - "!package.json"
-        - "!node_modules"
+        - "!node_modules/**"
     iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-event-handler"
     iamRoleStatements:
       - Effect: Allow
@@ -81,7 +89,7 @@ functions:
                 - users
 
   trigger:
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     handler: src/trigger.handler
@@ -90,7 +98,7 @@ functions:
         - ./**
         - "!./src/trigger.js"
         - "!package.json"
-        - "!node_modules"
+        - "!node_modules/**"
     iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-trigger"
     iamRoleStatements:
       - Effect: Allow

@@ -47,7 +47,7 @@ example payload written to DynamoDB
 ```
 
 - pk (partition key) is `log name#id#stream`
-- sk (sort key) should be a [lexicographic] [monotic] value, our suggestion would be to use [ulid] for the sort key.
+- sk (sort key) should be a [lexicographic][monotic] value, our suggestion would be to use [ulid] for the sort key.
 - type is the name of the event useful for event handlers.
 - log name of log.
 - payload should contain the id and any optional extra fields.

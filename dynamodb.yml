@@ -1,7 +1,7 @@
 Type: AWS::DynamoDB::Table
 Properties:
   TableName: "${opt:stage, 'local'}-dynamodb-logs"
-  BillingMode: 'PAY_PER_REQUEST'
+  BillingMode: "PAY_PER_REQUEST"
   AttributeDefinitions:
     - AttributeName: pk
       AttributeType: S
@@ -22,6 +22,5 @@ Properties:
   PointInTimeRecoverySpecification:
     PointInTimeRecoveryEnabled: true
   Tags:
-      -
-        Key: "dynamodb-table"
-        Value: "${opt:stage, 'local'}-dynamodb-logs"
+    - Key: "dynamodb-table"
+      Value: "${opt:stage, 'local'}-dynamodb-logs"

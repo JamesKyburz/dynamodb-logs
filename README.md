@@ -94,7 +94,7 @@ The lambda is then triggered which will publish the changed keys to [EventBridge
 
 export AWS credentials before running `cli.sh`
 
-### Node.js
+### Node.js deploy to AWS
 
 ```sh
 npm i
@@ -102,7 +102,15 @@ npm i
 npx sls -c serverless-node.yml --stage dev deploy
 ```
 
-### Python
+### Node.js remove stack in AWS
+
+```sh
+npm i
+./cli.sh
+npx sls -c serverless-node.yml --stage dev remove
+```
+
+### Python deploy to AWS
 
 ```sh
 npm i
@@ -113,6 +121,14 @@ virtualenv venv
 pip3 install -r requirements.txt
 npx sls -c serverless-python.yml --stage dev deploy
 rm -rf venv
+```
+
+### Python remove stack in AWS
+
+```sh
+npm i
+./cli.sh
+npx sls -c serverless-python.yml --stage dev remove
 ```
 
 Query DynamoDB

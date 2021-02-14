@@ -5,5 +5,5 @@ function clear-prompt() {
 
 alias ll='ls -lh'
 
-ps1="\033[96m$PWD \h \033[35m\033[35m(ops-kitchen) \033[92mᐅ \033[0m"
+ps1="\033[96m\$PWD \h \033[35m\033[35m(${COMMIT_ID::-35}) \033[92mᐅ \033[0m"
 export PS1="${ps1:?}"

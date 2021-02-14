@@ -1,3 +1,5 @@
+'use strict'
+
 const EventBridge = require('aws-sdk/clients/eventbridge')
 
 exports.handler = async function trigger (event) {

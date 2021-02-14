@@ -1,3 +1,5 @@
+'use strict'
+
 const DynamoDB = require('aws-sdk/clients/dynamodb')
 const path = require('path')
 const os = require('os')

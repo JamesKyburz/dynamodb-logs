@@ -12,24 +12,6 @@ plugins:
   - serverless-python-requirements
   - serverless-offline-aws-eventbridge
 
-provider:
-  name: aws
-  deploymentBucket:
-    blockPublicAccess: true
-    serverSideEncryption: AES256
-  logRetentionInDays: 5
-  tracing:
-    lambda: true
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - xray:PutTelemetryRecords
-        - xray:PutTraceSegments
-      Resource: "*"
-  lambdaHashingVersion: 20201221
-  #tags:
-  #  commit: '${env:COMMIT_ID}'
-
 custom:
   serverless-offline-dynamodb-streams:
     apiVersion: "2013-12-02"
@@ -55,6 +37,36 @@ custom:
     region: us-east-1
     accessKeyId: x
     secretAccessKey: x
+  csm:
+    enabled:
+      local: true
+    port:
+      local: 31000
+    host:
+      local: 127.0.0.1
+
+provider:
+  name: aws
+  deploymentBucket:
+    blockPublicAccess: true
+    serverSideEncryption: AES256
+  logRetentionInDays: 5
+  tracing:
+    lambda: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTelemetryRecords
+        - xray:PutTraceSegments
+      Resource: "*"
+  lambdaHashingVersion: 20201221
+  environment:
+    AWS_CSM_ENABLED: ${self:custom.csm.enabled.${opt:stage}, false}
+    AWS_CSM_PORT: ${self:custom.csm.port.${opt:stage}, ''}
+    AWS_CSM_HOST: ${self:custom.csm.host.${opt:stage}, ''}
+  #tags:
+  #  commit: '${env:COMMIT_ID}'
+
 
 functions:
   eventHandler:

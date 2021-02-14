@@ -2,17 +2,64 @@
 
 set -euo pipefail
 
-touch .bash_history
+log_error() { echo -e "\033[0m\033[1;91m${*}\033[0m"; }
 
-docker run \
-  --rm \
-  -ti \
-  -e "AWS_ACCESS_KEY_ID" \
-  -e "AWS_SECRET_ACCESS_KEY" \
-  -e "AWS_SESSION_TOKEN" \
-  -v "$(pwd)":/work \
-  -v "$(pwd)/.bash_history:/root/.bash_history" \
-  -w /work \
-  --network host \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  jameskyburz/ops-kitchen bash
+function cli() {
+  local running
+  local branch
+  local commit_id
+  local hash
+
+  touch .bash_history
+  mkdir -p .home
+  cp .bashrc .home/
+
+  if [[ -f /.dockerenv ]]; then
+    log_error "You are already in docker :)"
+    return
+  fi
+
+  running=$(docker ps -q --filter 'name=dynamodb-logs-cli')
+
+  branch=$(git rev-parse --abbrev-ref HEAD | sed 's/[^a-z0-9]/-/g')
+  hash=$(git rev-parse HEAD)
+  commit_id="${branch:?}"-"${hash:?}"
+  if [[ "${1:-}" == "stop" ]]; then
+    if [[ -n "${running:-}" ]]; then
+      docker kill "${running:?}"
+    fi
+    docker-compose down
+    return
+  fi
+
+  if [[ -n "${running:-}" ]]; then
+    docker exec -ti "${running:?}" bash
+  else
+    docker-compose up -d
+    npx sls --stage=local -c dynamodb.local.yml dynamodb migrate
+    export MSYS_NO_PATHCONV=1
+
+    docker run \
+      --rm \
+      -ti \
+      -e "AWS_ACCESS_KEY_ID" \
+      -e "AWS_SECRET_ACCESS_KEY" \
+      -e "AWS_SESSION_TOKEN" \
+      -e "AWS_CSM_ENABLED=true" \
+      -e "AWS_CSM_PORT=31000" \
+      -e "AWS_CSM_HOST=127.0.0.1" \
+      -e "COMMIT_ID=${commit_id:?}" \
+      -e "HOME=/work/.home" \
+      -v "$(pwd)":/work \
+      -v "$(pwd)/.bash_history:/root/.bash_history" \
+      -v "$(pwd)/.bashrc:/root/.bashrc" \
+      -w /work \
+      --network host \
+      --name "dynamodb-logs-cli" \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      jameskyburz/ops-kitchen bash
+  fi
+}
+
+cli "${1:-}"
+

@@ -13,3 +13,6 @@ __pycache__
 *.pyc
 *.spec
 docs/source/.vs
+.home
+*.swp
+batch.sh

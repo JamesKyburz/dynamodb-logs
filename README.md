@@ -85,7 +85,7 @@ The lambda is then triggered which will publish the changed keys to [EventBridge
 
 ### required (serverless framework and tools)
 
-- [nodejs](https://nodejs.org)
+- [nodejs 14](https://nodejs.org)
 
 </details>
 

@@ -1,7 +1,7 @@
 const DynamoDB = require('aws-sdk/clients/dynamodb')
 const path = require('path')
 const os = require('os')
-const { stat, writeFile } = require('fs').promises
+const { stat, writeFile, readFile } = require('fs').promises
 
 const SEQUENCES_PATH = path.join(os.tmpdir(), 'sequences.json')
 
@@ -11,11 +11,12 @@ exports.handler = async function user ({
   }
 }) {
   const sequences = (await stat(SEQUENCES_PATH).catch(f => false))
-     ? require(SEQUENCES_PATH)
-     : {}
+    ? JSON.parse(await readFile(SEQUENCES_PATH))
+    : {}
 
   const current = sequences[pk] || '\x00'
   console.log({ pk, sk, sequences })
+
   const dynamodb = new DynamoDB.DocumentClient({
     convertEmptyValues: true,
     ...(process.env.IS_OFFLINE && {
@@ -25,6 +26,7 @@ exports.handler = async function user ({
       secretAccessKey: 'x'
     })
   })
+
   const { Items: items } = await dynamodb
     .query({
       TableName: process.env.DYNAMODB_TABLE,
@@ -35,7 +37,7 @@ exports.handler = async function user ({
       },
       ExpressionAttributeValues: {
         ':pk': pk,
-        ':sk': current,
+        ':sk': current
       },
       Limit: 1
     })

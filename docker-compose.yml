@@ -2,6 +2,7 @@ version: '3.1'
 
 services:
   dynamodb:
+    container_name: dynamodb-logs-dynamodb
     image: amazon/dynamodb-local
     command: -jar DynamoDBLocal.jar -sharedDb -dbPath ./
     restart: always

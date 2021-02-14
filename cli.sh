@@ -3,6 +3,7 @@
 set -euo pipefail
 
 log_error() { echo -e "\033[0m\033[1;91m${*}\033[0m"; }
+log_info() { echo -e "\033[0m\033[1;94m${*}\033[0m"; }
 
 function cli() {
   local running
@@ -25,6 +26,7 @@ function cli() {
   hash=$(git rev-parse HEAD)
   commit_id="${branch:?}"-"${hash:?}"
   if [[ "${1:-}" == "stop" ]]; then
+    log_info "stopping containers"
     if [[ -n "${running:-}" ]]; then
       docker kill "${running:?}"
     fi
@@ -33,10 +35,13 @@ function cli() {
   fi
 
   if [[ -n "${running:-}" ]]; then
+    log_info "docker exec to ${running:?}"
     docker exec -ti "${running:?}" bash
   else
-    docker-compose up -d
-    npx sls --stage=local -c dynamodb.local.yml dynamodb migrate
+    if [[ -z $(docker ps -q --filter 'name=dynamodb-logs-dynamodb') ]]; then
+      docker-compose up -d
+      npx sls --stage=local -c dynamodb.local.yml dynamodb migrate
+    fi
     export MSYS_NO_PATHCONV=1
 
     docker run \

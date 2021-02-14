@@ -61,7 +61,7 @@ provider:
 
 functions:
   eventHandler:
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     environment:
@@ -95,7 +95,7 @@ functions:
                 - users
 
   trigger:
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     handler: src/trigger.handler

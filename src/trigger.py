@@ -4,7 +4,9 @@ import boto3
 import os
 import json
 import sys
+
 from functools import reduce
+from decimal import Decimal
 
 
 def each_slice(size, iterable):
@@ -18,17 +20,32 @@ def each_slice(size, iterable):
         yield batch
 
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return int(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
 def handler(event, context):
+    boto3.resource("dynamodb")
+    deserializer = boto3.dynamodb.types.TypeDeserializer()
+
     def change(sum, item):
-        keys = item["dynamodb"]["Keys"]
-        pk = keys["pk"]["S"]
-        sk = keys["sk"]["S"]
+        new_image = {
+            k: deserializer.deserialize(v)
+            for k, v in item["dynamodb"]["NewImage"].items()
+        }
+        pk = new_image["pk"]
+        sk = new_image["sk"]
         if not pk.endswith("#stream"):
             return sum
-        log = pk.split("#")[0]
+        log = new_image["log"]
+        type = new_image["type"]
+        payload = new_image["payload"]
         if not log in sum:
             sum[log] = []
-        sum[log].append({"key": {"pk": pk, "sk": sk}})
+        sum[log].append({"key": {"pk": pk, "sk": sk}, "type": type, "payload": payload})
         return sum
 
     changes = reduce(
@@ -53,6 +70,24 @@ def handler(event, context):
 
     client = boto3.client("events", **config)
 
+    def detail(log, item):
+        detail_with_payload = json.dumps(
+            {
+                "log": log,
+                "key": item["key"],
+                "type": item["type"],
+                "payload": item["payload"],
+            },
+            cls=DecimalEncoder,
+        )
+        detail_less_payload = json.dumps(
+            {"log": log, "key": item["key"], "type": item["type"]}, cls=DecimalEncoder
+        )
+        if len(detail_with_payload) <= 10240:
+            return detail_with_payload
+        else:
+            return detail_less_payload
+
     for log, items in changes.items():
         for batch in each_slice(10, items):
             entries = list(
@@ -61,7 +96,7 @@ def handler(event, context):
                         "EventBusName": "dynamodb-log",
                         "Source": "dynamodb-log",
                         "DetailType": "stream changes",
-                        "Detail": json.dumps({"log": log, "key": item["key"]}),
+                        "Detail": detail(log, item),
                     },
                     batch,
                 )

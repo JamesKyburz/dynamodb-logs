@@ -128,6 +128,7 @@ async function run () {
       console.log(`no events found in archive between ${from} and ${to}`)
     }
   } else if (location === 'aws') {
+    const replayName = `run-archive-${new Date().getTime()}`
     if (action !== 'replay to AWS EventBridge') {
       const { stage } = await prompt({
         type: 'list',
@@ -174,7 +175,10 @@ async function run () {
       `,
         { stderr: 'inherit' }
       )
-      const ws = new WebSocket(wssUrl)
+
+      const ws = new WebSocket(wssUrl, {
+        headers: { 'replay-name': replayName }
+      })
       await new Promise((resolve, reject) =>
         ws.on('open', err => (err ? reject(err) : resolve()))
       )
@@ -187,9 +191,12 @@ async function run () {
 
       console.log(chalk.cyan(`will receive events via ${wssUrl}`))
       console.log(chalk.bold('select the local replay as the event target'))
-      await shell('npx @mhlabs/evb-cli replay --eventbus dynamodb-log', {
-        stdio: 'inherit'
-      })
+      await shell(
+        `npx @mhlabs/evb-cli replay --eventbus dynamodb-log --rule-prefix dynamodb-logs-local-archive-replay -n ${replayName}`,
+        {
+          stdio: 'inherit'
+        }
+      )
       console.log(chalk.green('running replay, waiting for events'))
 
       let written = 0
@@ -207,9 +214,12 @@ async function run () {
       }
     } else {
       console.log(chalk.bold('select event targets omitting local replay'))
-      await shell('npx @mhlabs/evb-cli replay --eventbus dynamodb-log', {
-        stdio: 'inherit'
-      })
+      await shell(
+        `npx @mhlabs/evb-cli replay --eventbus dynamodb-log -n ${replayName}`,
+        {
+          stdio: 'inherit'
+        }
+      )
     }
   }
 }

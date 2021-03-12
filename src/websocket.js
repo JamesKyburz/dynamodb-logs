@@ -17,6 +17,7 @@ exports.handler = async function websocket (event) {
 }
 
 async function register ({
+  headers: { 'replay-name': replayName },
   requestContext: { eventType, requestTimeEpoch, connectionId, domainName }
 }) {
   const pk = 'websocket#connection'
@@ -32,7 +33,8 @@ async function register ({
           pk,
           sk,
           connectionId,
-          endpoint
+          endpoint,
+          replayName
         }
       })
       .promise()

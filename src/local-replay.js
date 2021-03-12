@@ -11,22 +11,26 @@ exports.handler = async function localReplay (event) {
       ExpressionAttributeNames: {
         '#pk': 'pk',
         '#cid': 'connectionId',
-        '#ep': 'endpoint'
+        '#ep': 'endpoint',
+        '#rn': 'replayName'
       },
       ExpressionAttributeValues: {
         ':pk': 'websocket#connection'
       },
-      ProjectionExpression: '#cid, #ep'
+      ProjectionExpression: '#cid, #ep, #rn'
     })
     .promise()
+
   if (!items.length) return
+  const matched = items.filter(item => item.replayName === event['replay-name'])
+  if (!matched.length) return
 
   const apigateway = new ApiGatewayManagementApi({
     endpoint: items[0].endpoint
   })
 
   await Promise.all(
-    items.map(item => {
+    matched.map(item => {
       return apigateway
         .postToConnection({
           ConnectionId: item.connectionId,

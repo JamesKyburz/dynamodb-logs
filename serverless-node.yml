@@ -1,6 +1,6 @@
 service: dynamodb-logs
 
-frameworkVersion: ^2.19.0
+frameworkVersion: ^2.28.0
 
 package:
   individually: true
@@ -10,7 +10,7 @@ plugins:
   - serverless-offline
   - serverless-offline-dynamodb-streams
   - serverless-offline-aws-eventbridge
-
+  - serverless-plugin-conditional-functions
 custom:
   serverless-offline-dynamodb-streams:
     apiVersion: "2013-12-02"
@@ -27,6 +27,8 @@ custom:
     region: us-east-1
     accessKeyId: x
     secretAccessKey: x
+    retryDelayMs: 1000
+    maximumRetryAttempts: 5
   csm:
     enabled:
       local: true
@@ -55,13 +57,27 @@ provider:
     AWS_CSM_PORT: ${self:custom.csm.port.${opt:stage}, ''}
     AWS_CSM_HOST: ${self:custom.csm.host.${opt:stage}, ''}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-  #tags:
-  #  commit: '${env:COMMIT_ID}'
+  eventBridge:
+    useCloudFormation: true
+  tags:
+    commit: '${env:COMMIT_ID}'
 
 
 functions:
+  saveToLocalDb:
+    enabled: '"${opt:stage, "local"}" == "local"'
+    runtime: nodejs12.x
+    handler: src/sqlite3.handler
+    events:
+      - eventBridge:
+          eventBus: !Ref eventBus
+          pattern:
+            source:
+              - "dynamodb-log"
+            detail-type:
+              - "stream changes"
   eventHandler:
-    runtime: nodejs14.x
+    runtime: nodejs12.x
     timeout: 6
     memorySize: 128
     environment:
@@ -74,7 +90,7 @@ functions:
         - "!./src/handler.js"
         - "!package.json"
         - "!node_modules"
-    iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-event-handler"
+    iamRoleStatementsName: "dynamodb-logs-${opt:stage, 'local'}-event-handler"
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -84,7 +100,7 @@ functions:
     iamRoleStatementsInherit: true
     events:
       - eventBridge:
-          eventBus: "dynamodb-log"
+          eventBus: !Ref eventBus
           pattern:
             source:
               - "dynamodb-log"
@@ -93,9 +109,11 @@ functions:
             detail:
               log:
                 - users
+              type:
+                - create
 
   trigger:
-    runtime: nodejs14.x
+    runtime: nodejs12.x
     timeout: 6
     memorySize: 128
     handler: src/trigger.handler
@@ -105,7 +123,7 @@ functions:
         - "!./src/trigger.js"
         - "!package.json"
         - "!node_modules"
-    iamRoleStatementsName: "${self:service.name}-${opt:stage, 'local'}-trigger"
+    iamRoleStatementsName: "dynamodb-logs-${opt:stage, 'local'}-trigger"
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -117,7 +135,7 @@ functions:
       - stream:
           type: dynamodb
           arn:
-            Fn::GetAtt: [dynamodb, StreamArn]
+            !GetAtt dynamodb.StreamArn
           batchSize: 25
           batchWindow: 1
           parallelizationFactor: 4
@@ -127,3 +145,11 @@ functions:
 resources:
   Resources:
     dynamodb: ${file(./dynamodb.yml)}
+    eventBus: ${file(./event-bus.yml)}
+    eventBusArchive: ${file(./event-bus-archive.yml)}
+  Outputs:
+    eventBusArn:
+      Description: arn of eventbus
+      Value: !GetAtt eventBus.Arn
+      Export:
+        Name: eventBusArn

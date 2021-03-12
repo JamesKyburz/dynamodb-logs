@@ -17,14 +17,17 @@ EventBridge reads
 I previously built [level-eventstore] and wanted the same benefits of append only logs, but using serverless.
 
 By using DynamoDB with [DynamoDB Streams] we can build append only logs.
-Although we cannot implement a strict append only log we can order log items by when they are written.
+Although we cannot implement a strict append only log we can order log items by when they are written, and with conditional writes we can perform optimistic locking.
 
-By using a either a [Universally Unique Lexicographically Sortable Identifier] or a [monotic] value (at item level) we can preserve the item order when reading from DynamoDB.
+We can preserve the item order when reading from DynamoDB using a sort key.
 
 - Logs are saved in DynamoDB.
 - Publish / Subscribe changes using [EventBridge].
 
-### how?
+### license
+
+[Apache License, Version 2.0](LICENSE)
+
 
 <details>
   <summary>design</summary>
@@ -36,7 +39,7 @@ example payload written to DynamoDB
 ```json
 {
   "pk": "users#12#stream",
-  "sk": "1610121906-rnd",
+  "sk": 1,
   "type": "create",
   "log": "users",
   "payload": {
@@ -46,8 +49,8 @@ example payload written to DynamoDB
 }
 ```
 
-- pk (partition key) is `log name#id#stream`
-- sk (sort key) should be a [lexicographic] [monotic] value, our suggestion would be to use [ulid] for the sort key.
+- pk (partition key) is `log name#id#stream`.
+- sk (sort key).
 - type is the name of the event useful for event handlers.
 - log name of log.
 - payload should contain the id and any optional extra fields.
@@ -67,8 +70,6 @@ The lambda is then triggered which will publish the changed keys to [EventBridge
 - [Python event handler example](./src/handler.py)
 
 </details>
-
-### setup
 
 <details>
   <summary>install prerequisites</summary>
@@ -136,19 +137,6 @@ Query DynamoDB
 ```sh
 ./cli.sh
 export AWS_DEFAULT_REGION=us-east-1
-aws dynamodb put-item \
-  --table-name local-dynamodb-logs \
-  --item """
-  {
-    \"pk\": { \"S\": \"users#12#stream\" },
-    \"sk\": { \"S\": \"$(date '+%s')\" },
-    \"type\": { \"S\": \"create\" },
-    \"log\": { \"S\": \"users\" },
-    \"payload\": { \"M\": {
-      \"id\": { \"S\": \"12\"},
-      \"email\": { \"S\": \"test@example.com\"}
-    }}
-  }"""
 npx dynamodb-query-cli \
   --region us-east-1
 ```
@@ -156,7 +144,7 @@ npx dynamodb-query-cli \
 </details>
 
 <details>
-  <summary>locally</summary>
+  <summary>offline</summary>
 
 ```sh
 docker-compose up -d
@@ -190,7 +178,7 @@ aws dynamodb put-item \
   --item """
   {
     \"pk\": { \"S\": \"users#12#stream\" },
-    \"sk\": { \"S\": \"$(date '+%s')\" },
+    \"sk\": { \"N\": \"${sk:-1}\" },
     \"type\": { \"S\": \"create\" },
     \"log\": { \"S\": \"users\" },
     \"payload\": { \"M\": {
@@ -198,6 +186,7 @@ aws dynamodb put-item \
       \"email\": { \"S\": \"test@example.com\"}
     }}
   }""" \
+  --condition-expression "attribute_not_exists(pk)" \
   --endpoint http://localhost:8000
 ```
 
@@ -216,16 +205,101 @@ docker-compose down
 
 </details>
 
-# license
+<details>
+  <summary>retries offline and in AWS</summary>
 
-[Apache License, Version 2.0](LICENSE)
+### offline retries
+
+per stack retry limit is configurable using the [offline eventbridge plugin].
+
+```yaml
+custom:
+  serverless-offline-aws-eventbridge:
+    retryDelayMs: 1000
+    maximumRetryAttempts: 5
+```
+
+### destinations
+
+using onFailure failures can be handled by your application.
+
+failure payloads look like this
+
+```yaml
+  eventHandler:
+    handler: src/handler.handler
+    destinations:
+      onFailure: retry
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "lambda:InvokeFunction"
+        Resource:
+          - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:dynamodb-logs-${opt:stage}-retry"
+```
+
+```json
+{
+    "version": "1.0",
+    "timestamp": "<timestamp>",
+    "requestContext": {
+        "requestId": "<uuid>",
+        "functionArn": "arn:...",
+        "condition": "RetriesExhausted",
+        "approximateInvokeCount": 3
+    },
+    "requestPayload": {
+        "version": "0",
+        "id": "<uuid>",
+        "detail-type": "stream changes",
+        "source": "dynamodb-log",
+        "account": "<account>",
+        "time": "<timestamp>",
+        "region": "<region>",
+        "resources": [],
+        "detail": {
+            "log": "<log>",
+            "key": {
+                "pk": "<pk>",
+                "sk": 0
+            },
+            "type": "<create>",
+            "payload": {
+                "id": "<id>"
+            }
+        }
+    },
+    "responseContext": {
+        "statusCode": 200,
+        "executedVersion": "$LATEST",
+        "functionError": "Unhandled"
+    },
+    "responsePayload": {
+        "errorType": "Error",
+        "errorMessage": "<error message>",
+        "trace": []
+    }
+}
+```
+
+</details>
+
+<details>
+  <summary>replay using EventBridge archive</summary>
+
+  When run offline events are persisted to sqlite3 file `./db`.
+
+  Events can be replayed to EventBridge or DynamoDB, you can also replay events from AWS to local which will deplay an extra stack using a websocket lambda and a new event target that writes to the connected websockets.
+
+  ```sh
+  ./cli.sh
+  ./run-archive.js
+  ```
+</details>
 
 [writes]: ./diagrams/writes.png
 [reads]: ./diagrams/reads.png
 [eventbridge]: https://aws.amazon.com/eventbridge/
+[offline eventbridge plugin]: https://github.com/rubenkaiser/serverless-offline-eventBridge
 [level-eventstore]: https://github.com/JamesKyburz/level-eventstore
 [dynamodb streams]: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html
-[universally unique lexicographically sortable identifier]: https://github.com/ulid/spec
-[monotic]: https://en.wikipedia.org/wiki/Monotonic_function
-[lexicographic]: https://en.wikipedia.org/wiki/Lexicographic_order
-[ulid]: https://github.com/ulid/spec

@@ -5,19 +5,24 @@ const path = require('path')
 const os = require('os')
 const { stat, writeFile, readFile } = require('fs').promises
 
-const SEQUENCES_PATH = path.join(os.tmpdir(), 'sequences.json')
+exports.handler = async function user (event) {
+  const {
+    detail: {
+      key: { sk, pk }
+    }
+  } = event
+  const sequencePath = path.join(os.tmpdir(), `sequences-${pk}.txt`)
+  const current = Number(
+    (await stat(sequencePath).catch(f => false))
+      ? await readFile(sequencePath)
+      : '0'
+  )
 
-exports.handler = async function user ({
-  detail: {
-    key: { sk, pk }
+  console.log(JSON.stringify({ event, current }, null, 2))
+
+  if (sk < current + 1) {
+    return
   }
-}) {
-  const sequences = (await stat(SEQUENCES_PATH).catch(f => false))
-    ? JSON.parse(await readFile(SEQUENCES_PATH))
-    : {}
-
-  const current = sequences[pk] || '\x00'
-  console.log({ pk, sk, sequences })
 
   const dynamodb = new DynamoDB.DocumentClient({
     convertEmptyValues: true,
@@ -45,12 +50,10 @@ exports.handler = async function user ({
     })
     .promise()
 
-  const size = items.length
-  if (size > 0) {
-    sequences[pk] = items[size - 1]['sk']
+  if (items.length === 1) {
     console.log(`next record > ${current}`)
     console.log(JSON.stringify({ items }, null, 2))
-    await writeFile(SEQUENCES_PATH, JSON.stringify(sequences))
+    await writeFile(sequencePath, String(items[0].sk))
   } else {
     console.log(`no new record > ${current}`)
   }

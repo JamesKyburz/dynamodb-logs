@@ -50,6 +50,8 @@ function cli() {
       -e "AWS_ACCESS_KEY_ID" \
       -e "AWS_SECRET_ACCESS_KEY" \
       -e "AWS_SESSION_TOKEN" \
+      -e "AWS_DEFAULT_REGION=us-east-1" \
+      -e "AWS_REGION=us-east-1" \
       -e "AWS_CSM_ENABLED=true" \
       -e "AWS_CSM_PORT=31000" \
       -e "AWS_CSM_HOST=127.0.0.1" \

@@ -1,0 +1,95 @@
+service: dynamodb-logs-local-archive-replay
+
+frameworkVersion: ^2.28.0
+
+package:
+  individually: true
+
+plugins:
+  - serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  deploymentBucket:
+    blockPublicAccess: true
+    serverSideEncryption: AES256
+  logRetentionInDays: 5
+  tracing:
+    lambda: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - xray:PutTelemetryRecords
+        - xray:PutTraceSegments
+      Resource: "*"
+  lambdaHashingVersion: 20201221
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  eventBridge:
+    useCloudFormation: true
+  tags:
+    commit: '${env:COMMIT_ID}'
+
+functions:
+  websocket:
+    handler: src/websocket.handler
+    runtime: nodejs12.x
+    timeout: 6
+    memorySize: 128
+    package:
+      exclude:
+        - ./**
+        - "!./src/websocket.js"
+    environment:
+      allowed_ip: "${env:external_ip4_address}"
+      DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
+      stage: "${opt:stage, 'local'}"
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+    iamRoleStatementsName: "dynamodb-logs-local-archive-replay-${opt:stage, 'local'}-websocket"
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "dynamodb:PutItem"
+          - "dynamodb:DeleteItem"
+          - "dynamodb:Query"
+        Resource:
+          - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-dynamodb-logs"
+    iamRoleStatementsInherit: true
+  localReplay:
+    handler: src/local-replay.handler
+    runtime: nodejs12.x
+    timeout: 6
+    memorySize: 128
+    package:
+      exclude:
+        - ./**
+        - "!./src/local-replay.js"
+    environment:
+      DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
+    iamRoleStatementsName: "dynamodb-logs-local-archive-replay-${opt:stage, 'local'}-local-replay"
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "dynamodb:Query"
+        Resource:
+          - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-dynamodb-logs"
+      - Effect: Allow
+        Action:
+          - "execute-api:ManageConnections"
+        Resource:
+          - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:**/@connections/*"
+    iamRoleStatementsInherit: true
+    events:
+      - eventBridge:
+          eventBus: ${cf:dynamodb-logs-${opt:stage, 'local'}.eventBusArn}
+          pattern:
+            source:
+              - "dynamodb-log"
+            detail-type:
+              - "stream changes"
+            replay-name:
+              - exists: true

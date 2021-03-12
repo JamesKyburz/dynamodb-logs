@@ -17,3 +17,6 @@ docs/source/.vs
 *.swp
 batch.sh
 .husky
+aws.sh
+db
+.prompt

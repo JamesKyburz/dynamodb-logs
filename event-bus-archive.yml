@@ -1,0 +1,7 @@
+Type: AWS::Events::Archive
+
+Properties:
+  ArchiveName: "dynamodb-logs-archive"
+  Description: "archive for all events"
+  RetentionDays: 0
+  SourceArn: !Sub "arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/dynamodb-log"

@@ -1,0 +1,4 @@
+Type: AWS::Events::EventBus
+
+Properties:
+  Name: dynamodb-log

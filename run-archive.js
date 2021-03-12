@@ -71,24 +71,28 @@ async function run () {
         }
       }
       const putRequestItems = Object.values(items)
-      const { UnprocessedItems: unprocessedItems } = await localDynamodb
-        .batchWrite({
-          RequestItems: {
-            'local-dynamodb-logs': putRequestItems.map(event => ({
-              PutRequest: {
-                Item: {
-                  ...event.detail.key,
-                  log: event.detail.log,
-                  type: event.detail.type,
-                  payload: event.detail.payload
+      try {
+        const { UnprocessedItems: unprocessedItems } = await localDynamodb
+          .batchWrite({
+            RequestItems: {
+              'local-dynamodb-logs': putRequestItems.map(event => ({
+                PutRequest: {
+                  Item: {
+                    ...event.detail.key,
+                    log: event.detail.log,
+                    type: event.detail.type,
+                    payload: event.detail.payload
+                  }
                 }
-              }
-            }))
-          }
-        })
-        .promise()
-      if (Object.keys(unprocessedItems).length) {
-        throw new Error(`unprocessed ${JSON.stringify(unprocessedItems)}`)
+              }))
+            }
+          })
+          .promise()
+        if (Object.keys(unprocessedItems).length) {
+          throw new Error(`unprocessed ${JSON.stringify(unprocessedItems)}`)
+        }
+      } catch (err) {
+        console.error(`failed ${JSON.stringify(putRequestItems, null, 2)}`)
       }
       return putRequestItems.length
     }

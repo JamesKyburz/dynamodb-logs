@@ -2,7 +2,7 @@
 
 sample repo to use DynamoDB with append only logs.
 
-examples contain either Node.js or Python examples.
+examples contain either Node.js or Python.
 
 DynamoDB write triggers
 

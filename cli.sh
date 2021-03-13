@@ -69,4 +69,3 @@ function cli() {
 }
 
 cli "${1:-}"
-

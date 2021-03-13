@@ -16,7 +16,6 @@ docs/source/.vs
 .home
 *.swp
 batch.sh
-.husky
 aws.sh
 db
 .prompt

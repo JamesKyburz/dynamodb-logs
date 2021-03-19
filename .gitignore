@@ -19,3 +19,4 @@ batch.sh
 aws.sh
 db
 .prompt
+events.ldjson

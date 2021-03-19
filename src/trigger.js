@@ -4,7 +4,6 @@ const EventBridge = require('aws-sdk/clients/eventbridge')
 const DynamoDB = require('aws-sdk/clients/dynamodb')
 
 exports.handler = async function trigger (event) {
-  console.log(JSON.stringify(event, null, 2))
   const docClient = new DynamoDB.DocumentClient({ convertEmptyValues: true })
   const map = docClient.getTranslator()
   const Shape = docClient.service.api.operations.getItem.output.members.Item

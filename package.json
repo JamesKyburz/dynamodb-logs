@@ -30,6 +30,7 @@
     "date-prompt": "1.0.0",
     "dynamodb-query-cli": "0.0.5",
     "execa": "4.1.0",
+    "faker": "5.4.0",
     "husky": "5.1.3",
     "inquirer": "6.5.2",
     "lint-staged": "10.5.4",

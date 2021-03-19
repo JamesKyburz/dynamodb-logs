@@ -5,13 +5,17 @@ exports.handler = async function save (event) {
     console.log(`will not save replay ${event.detail['replay-name']} to db`)
     return
   }
-  db.serialize(() => {
-    db.run(`
+  await new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run(`
       create table if not exists events (createdAt int not null, payload text not null);
       create index if not exists eventsCreatedAt on events(eventedAt);
     `)
-    const createEvent = db.prepare('insert into events values(?, ?)')
-    createEvent.run([event.time, JSON.stringify(event)])
-    createEvent.finalize()
+      const createEvent = db.prepare('insert into events values(?, ?)')
+      createEvent.run([event.time, JSON.stringify(event)], err =>
+        err ? reject(err) : resolve()
+      )
+      createEvent.finalize()
+    })
   })
 }

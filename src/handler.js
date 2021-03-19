@@ -1,28 +1,16 @@
 'use strict'
 
 const DynamoDB = require('aws-sdk/clients/dynamodb')
-const path = require('path')
-const os = require('os')
-const { stat, writeFile, readFile } = require('fs').promises
 
 exports.handler = async function user (event) {
   const {
     detail: {
-      key: { sk, pk }
+      key: { sk, pk },
+      payload: { id } = {}
     }
   } = event
-  const sequencePath = path.join(os.tmpdir(), `sequences-${pk}.txt`)
-  const current = Number(
-    (await stat(sequencePath).catch(f => false))
-      ? await readFile(sequencePath)
-      : '0'
-  )
 
-  console.log(JSON.stringify({ event, current }, null, 2))
-
-  if (sk < current + 1) {
-    return
-  }
+  console.log('products handler', JSON.stringify({ pk, sk, event }, null, 2))
 
   const dynamodb = new DynamoDB.DocumentClient({
     convertEmptyValues: true,
@@ -34,9 +22,31 @@ exports.handler = async function user (event) {
     })
   })
 
-  const { Items: items } = await dynamodb
+  const userPk = id
+    ? `users#${id}`
+    : pk
+        .split('#')
+        .slice(0, -1)
+        .join('#')
+
+  const { Item: { version: currentVersion = 0 } = {} } = await dynamodb
+    .get({
+      TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+      Key: {
+        pk: userPk,
+        sk: userPk
+      },
+      ConsistentRead: true,
+      ExpressionAttributeNames: {
+        '#version': 'version'
+      },
+      ProjectionExpression: '#version'
+    })
+    .promise()
+
+  const { Items: logItems } = await dynamodb
     .query({
-      TableName: process.env.DYNAMODB_TABLE,
+      TableName: process.env.DYNAMODB_LOGS_TABLE,
       KeyConditionExpression: '#pk = :pk and #sk > :sk',
       ExpressionAttributeNames: {
         '#pk': 'pk',
@@ -44,17 +54,125 @@ exports.handler = async function user (event) {
       },
       ExpressionAttributeValues: {
         ':pk': pk,
-        ':sk': current
-      },
-      Limit: 1
+        ':sk': currentVersion
+      }
     })
     .promise()
 
-  if (items.length === 1) {
-    console.log(`next record > ${current}`)
-    console.log(JSON.stringify({ items }, null, 2))
-    await writeFile(sequencePath, String(items[0].sk))
-  } else {
-    console.log(`no new record > ${current}`)
+  if (logItems.length === 0) {
+    console.log(`no event found ${pk}, sk > ${currentVersion}`)
+    return
   }
+
+  for (const event of logItems) {
+    if (event.sk < currentVersion) {
+      console.log(
+        `current version is higher, will ignore ${pk} ${event.sk} < ${currentVersion}`
+      )
+      return
+    }
+
+    const handler = getEventHandler(dynamodb, userPk, event)
+
+    if (!handler) {
+      console.error(`no event handler found for type ${event.type}`)
+    } else {
+      await handler(event)
+    }
+  }
+}
+
+function getEventHandler (dynamodb, pk, { type, payload: { id } }) {
+  const sk = pk
+  return {
+    async signup ({ sk: version, payload: { name, email } }) {
+      await dynamodb
+        .put({
+          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          Item: {
+            pk,
+            sk,
+            type: 'user',
+            id,
+            name,
+            email,
+            version
+          },
+          ConditionExpression: 'attribute_not_exists(pk)',
+          ReturnValues: 'NONE'
+        })
+        .promise()
+    },
+    async addPhoneNumber ({ sk: version, payload: { phoneNumber } }) {
+      await dynamodb
+        .update({
+          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          ExpressionAttributeNames: {
+            '#phoneNumber': 'phoneNumber',
+            '#version': 'version'
+          },
+          ExpressionAttributeValues: {
+            ':phoneNumber': phoneNumber,
+            ':version': version,
+            ':currentVersion': version - 1
+          },
+          Key: {
+            pk,
+            sk
+          },
+          UpdateExpression:
+            'SET #phoneNumber = :phoneNumber, #version = :version',
+          ConditionExpression: '#version = :currentVersion',
+          ReturnValues: 'NONE'
+        })
+        .promise()
+    },
+    async verifyPhoneNumber ({ sk: version }) {
+      await dynamodb
+        .update({
+          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          ExpressionAttributeNames: {
+            '#verifiedPhoneNumber': 'verifiedPhoneNumber',
+            '#version': 'version'
+          },
+          ExpressionAttributeValues: {
+            ':verifiedPhoneNumber': true,
+            ':version': version,
+            ':currentVersion': version - 1
+          },
+          Key: {
+            pk,
+            sk
+          },
+          UpdateExpression:
+            'SET #verifiedPhoneNumber = :verifiedPhoneNumber, #version = :version',
+          ConditionExpression: '#version = :currentVersion',
+          ReturnValues: 'NONE'
+        })
+        .promise()
+    },
+    async addLocation ({ sk: version, payload: { long, lat } }) {
+      await dynamodb
+        .update({
+          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          ExpressionAttributeNames: {
+            '#location': 'location',
+            '#version': 'version'
+          },
+          ExpressionAttributeValues: {
+            ':location': { long, lat },
+            ':version': version,
+            ':currentVersion': version - 1
+          },
+          Key: {
+            pk,
+            sk
+          },
+          UpdateExpression: 'SET #location = :location, #version = :version',
+          ConditionExpression: '#version = :currentVersion',
+          ReturnValues: 'NONE'
+        })
+        .promise()
+    }
+  }[type]
 }

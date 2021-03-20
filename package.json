@@ -41,6 +41,7 @@
     "serverless-dynamodb-local": "0.2.39",
     "serverless-iam-roles-per-function": "3.1.0",
     "serverless-offline": "6.8.0",
+    "serverless-offline-aws-eventbridge": "1.5.1",
     "serverless-offline-dynamodb-streams": "4.2.0",
     "serverless-plugin-conditional-functions": "1.0.4",
     "serverless-python-requirements": "5.1.0",
@@ -69,8 +70,5 @@
   "bugs": {
     "url": "https://github.com/JamesKyburz/dynamodb-logs/issues"
   },
-  "homepage": "https://github.com/JamesKyburz/dynamodb-logs#readme",
-  "dependencies": {
-    "serverless-offline-aws-eventbridge": "1.5.1"
-  }
+  "homepage": "https://github.com/JamesKyburz/dynamodb-logs#readme"
 }

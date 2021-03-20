@@ -17,3 +17,4 @@ custom:
 resources:
   Resources:
     dynamodb: ${file(./dynamodb.yml)}
+    readmodel: ${file(./dynamodb.read.yml)}

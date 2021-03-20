@@ -28,7 +28,6 @@ We can preserve the item order when reading from DynamoDB using a sort key.
 
 [Apache License, Version 2.0](LICENSE)
 
-
 <details>
   <summary>design</summary>
 
@@ -40,10 +39,11 @@ example payload written to DynamoDB
 {
   "pk": "users#12#stream",
   "sk": 1,
-  "type": "create",
+  "type": "signup",
   "log": "users",
   "payload": {
     "id": "12",
+    "name": "test",
     "email": "test@example.com"
   }
 }
@@ -179,10 +179,11 @@ aws dynamodb put-item \
   {
     \"pk\": { \"S\": \"users#12#stream\" },
     \"sk\": { \"N\": \"${sk:-1}\" },
-    \"type\": { \"S\": \"create\" },
+    \"type\": { \"S\": \"signup\" },
     \"log\": { \"S\": \"users\" },
     \"payload\": { \"M\": {
       \"id\": { \"S\": \"12\"},
+      \"name\": { \"S\": \"test\"}
       \"email\": { \"S\": \"test@example.com\"}
     }}
   }""" \
@@ -194,6 +195,9 @@ Query DynamoDB
 
 ```sh
 ./cli.sh
+export AWS_ACCESS_KEY_ID=x
+export AWS_SECRET_ACCESS_KEY=x
+export AWS_DEFAULT_REGION=us-east-1
 npx dynamodb-query-cli \
   --region us-east-1 \
   --endpoint http://localhost:8000
@@ -226,59 +230,59 @@ using onFailure failures can be handled by your application.
 failure payloads look like this
 
 ```yaml
-  eventHandler:
-    handler: src/handler.handler
-    destinations:
-      onFailure: retry
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - "lambda:InvokeFunction"
-        Resource:
-          - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:dynamodb-logs-${opt:stage}-retry"
+eventHandler:
+  handler: src/handler.handler
+  destinations:
+    onFailure: retry
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "lambda:InvokeFunction"
+      Resource:
+        - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:dynamodb-logs-${opt:stage}-retry"
 ```
 
 ```json
 {
-    "version": "1.0",
-    "timestamp": "<timestamp>",
-    "requestContext": {
-        "requestId": "<uuid>",
-        "functionArn": "arn:...",
-        "condition": "RetriesExhausted",
-        "approximateInvokeCount": 3
-    },
-    "requestPayload": {
-        "version": "0",
-        "id": "<uuid>",
-        "detail-type": "stream changes",
-        "source": "dynamodb-log",
-        "account": "<account>",
-        "time": "<timestamp>",
-        "region": "<region>",
-        "resources": [],
-        "detail": {
-            "log": "<log>",
-            "key": {
-                "pk": "<pk>",
-                "sk": 0
-            },
-            "type": "<create>",
-            "payload": {
-                "id": "<id>"
-            }
-        }
-    },
-    "responseContext": {
-        "statusCode": 200,
-        "executedVersion": "$LATEST",
-        "functionError": "Unhandled"
-    },
-    "responsePayload": {
-        "errorType": "Error",
-        "errorMessage": "<error message>",
-        "trace": []
+  "version": "1.0",
+  "timestamp": "<timestamp>",
+  "requestContext": {
+    "requestId": "<uuid>",
+    "functionArn": "arn:...",
+    "condition": "RetriesExhausted",
+    "approximateInvokeCount": 3
+  },
+  "requestPayload": {
+    "version": "0",
+    "id": "<uuid>",
+    "detail-type": "stream changes",
+    "source": "dynamodb-log",
+    "account": "<account>",
+    "time": "<timestamp>",
+    "region": "<region>",
+    "resources": [],
+    "detail": {
+      "log": "<log>",
+      "key": {
+        "pk": "<pk>",
+        "sk": 0
+      },
+      "type": "<signup>",
+      "payload": {
+        "id": "<id>"
+      }
     }
+  },
+  "responseContext": {
+    "statusCode": 200,
+    "executedVersion": "$LATEST",
+    "functionError": "Unhandled"
+  },
+  "responsePayload": {
+    "errorType": "Error",
+    "errorMessage": "<error message>",
+    "trace": []
+  }
 }
 ```
 
@@ -287,14 +291,15 @@ failure payloads look like this
 <details>
   <summary>replay using EventBridge archive</summary>
 
-  When run offline events are persisted to sqlite3 file `./db`.
+When run offline events are persisted to sqlite3 file `./db`.
 
-  Events can be replayed to EventBridge or DynamoDB, you can also replay events from AWS to local which will deplay an extra stack using a websocket lambda and a new event target that writes to the connected websockets.
+Events can be replayed to EventBridge or DynamoDB, you can also replay events from AWS to local which will deplay an extra stack using a websocket lambda and a new event target that writes to the connected websockets.
 
-  ```sh
-  ./cli.sh
-  ./run-archive.js
-  ```
+```sh
+./cli.sh
+./run-archive.js
+```
+
 </details>
 
 [writes]: ./diagrams/writes.png

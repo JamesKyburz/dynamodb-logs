@@ -27,7 +27,7 @@ custom:
     region: us-east-1
     accessKeyId: x
     secretAccessKey: x
-    retryDelayMs: 1000
+    retryDelayMs: 500
     maximumRetryAttempts: 5
   csm:
     enabled:
@@ -60,8 +60,7 @@ provider:
   eventBridge:
     useCloudFormation: true
   tags:
-    commit: '${env:COMMIT_ID}'
-
+    commit: "${env:COMMIT_ID}"
 
 functions:
   saveToLocalDb:
@@ -81,7 +80,8 @@ functions:
     timeout: 6
     memorySize: 128
     environment:
-      DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
+      DYNAMODB_LOGS_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
+      DYNAMODB_PRODUCTS_TABLE: "${opt:stage, 'local'}-products"
     reservedConcurrency: 1
     handler: src/handler.handler
     package:
@@ -97,6 +97,13 @@ functions:
           - "dynamodb:Query"
         Resource:
           - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-dynamodb-logs"
+      - Effect: Allow
+        Action:
+          - "dynamodb:GetItem"
+          - "dynamodb:PutItem"
+          - "dynamodb:UpdateItem"
+        Resource:
+          - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-products"
     iamRoleStatementsInherit: true
     events:
       - eventBridge:
@@ -110,7 +117,10 @@ functions:
               log:
                 - users
               type:
-                - create
+                - signup
+                - addPhoneNumber
+                - verifyPhoneNumber
+                - addLocation
 
   trigger:
     runtime: nodejs12.x
@@ -134,8 +144,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            !GetAtt dynamodb.StreamArn
+          arn: !GetAtt dynamodb.StreamArn
           batchSize: 25
           batchWindow: 1
           parallelizationFactor: 4
@@ -145,6 +154,7 @@ functions:
 resources:
   Resources:
     dynamodb: ${file(./dynamodb.yml)}
+    readmodel: ${file(./dynamodb.read.yml)}
     eventBus: ${file(./event-bus.yml)}
     eventBusArchive: ${file(./event-bus-archive.yml)}
   Outputs:

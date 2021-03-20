@@ -136,9 +136,18 @@ Query DynamoDB
 
 ```sh
 ./cli.sh
-export AWS_DEFAULT_REGION=us-east-1
-npx dynamodb-query-cli \
-  --region us-east-1
+./dynamodb-local-query.sh
+```
+
+</details>
+
+<details>
+  <summary>generate fake user data</summary>
+
+generate fake user data locally or in aws
+
+```sh
+./create-fake-data.sh
 ```
 
 </details>
@@ -195,12 +204,7 @@ Query DynamoDB
 
 ```sh
 ./cli.sh
-export AWS_ACCESS_KEY_ID=x
-export AWS_SECRET_ACCESS_KEY=x
-export AWS_DEFAULT_REGION=us-east-1
-npx dynamodb-query-cli \
-  --region us-east-1 \
-  --endpoint http://localhost:8000
+./dynamodb-local-query.sh
 ```
 
 ```sh

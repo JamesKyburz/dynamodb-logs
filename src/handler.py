@@ -51,8 +51,6 @@ def handler(event, context):
     else:
         current_version = Decimal(0)
 
-    print(f"CURRENT VERSION {str(current_version)}")
-
     logs_response = logs_table.query(
         KeyConditionExpression="#pk = :pk and #sk > :sk",
         ExpressionAttributeNames={"#pk": "pk", "#sk": "sk"},

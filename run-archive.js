@@ -107,7 +107,7 @@ async function run () {
 
     const logs = await new Promise((resolve, reject) => {
       db.all(
-        `select distinct log from events where createdAt >= ? and createdAt <= ?`,
+        'select distinct log from events where createdAt >= ? and createdAt <= ?',
         from,
         to,
         (err, rows) => (err ? reject(err) : resolve(rows.map(row => row.log)))
@@ -123,7 +123,7 @@ async function run () {
 
     const types = await new Promise((resolve, reject) => {
       db.all(
-        `select distinct type from events where createdAt >= ? and createdAt <= ? and log in (?)`,
+        'select distinct type from events where createdAt >= ? and createdAt <= ? and log in (?)',
         from,
         to,
         filterLogs,

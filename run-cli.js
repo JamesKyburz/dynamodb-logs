@@ -16,7 +16,7 @@ async function cli () {
       choices: [
         'exit',
         'interactive shell',
-        'cleanup',
+        'local cleanup',
         'start offline',
         'deploy',
         'remove deploy',
@@ -27,8 +27,29 @@ async function cli () {
     })
     if (option === 'exit') {
       break
-    } else if (option === 'cleanup') {
-      await shell('./cli.sh stop', { stdio: 'inherit' })
+    } else if (option === 'local cleanup') {
+      const { deleteDb } = await prompt({
+        name: 'deleteDb',
+        type: 'confirm',
+        default: false,
+        message: 'delete sqlite db [n]?'
+      })
+
+      if (deleteDb) {
+        await shell('rm -rf db', { stdio: 'inherit' })
+      }
+
+      const { composeDown } = await prompt({
+        name: 'composeDown',
+        type: 'confirm',
+        default: true,
+        message: 'docker-compose down [y]?'
+      })
+
+      if (composeDown) {
+        await shell('./cli.sh stop', { stdio: 'inherit' })
+        break
+      }
     } else if (
       option === 'start offline' ||
       option === 'deploy' ||

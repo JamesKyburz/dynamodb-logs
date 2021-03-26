@@ -142,11 +142,15 @@ async function run () {
       const limit = 10
       const rows = await new Promise((resolve, reject) => {
         db.all(
-          `select * from events where createdAt >= ? and createdAt <= ? and log in (?) and type in (?) limit ${limit} offset ${offset} `,
+          `select * from events where createdAt >= ? and createdAt <= ? and log in (${Array(
+            filterLogs.length
+          ).fill('?')}) and type in (${Array(filterTypes.length).fill(
+            '?'
+          )}) order by createdAt limit ${limit} offset ${offset} `,
           from,
           to,
-          filterLogs,
-          filterTypes,
+          ...filterLogs,
+          ...filterTypes,
           (err, rows) => (err ? reject(err) : resolve(rows))
         )
       })

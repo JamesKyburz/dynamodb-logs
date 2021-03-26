@@ -45,12 +45,14 @@ provider:
   logRetentionInDays: 5
   tracing:
     lambda: true
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - xray:PutTelemetryRecords
-        - xray:PutTraceSegments
-      Resource: "*"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - xray:PutTelemetryRecords
+            - xray:PutTraceSegments
+          Resource: "*"
   lambdaHashingVersion: 20201221
   environment:
     AWS_CSM_ENABLED: ${self:custom.csm.enabled.${opt:stage}, false}
@@ -65,7 +67,7 @@ provider:
 functions:
   saveToLocalDb:
     enabled: '"${opt:stage, "local"}" == "local"'
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     handler: src/sqlite3.handler
     events:
       - eventBridge:
@@ -76,7 +78,7 @@ functions:
             detail-type:
               - "stream changes"
   eventHandler:
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     environment:
@@ -123,7 +125,7 @@ functions:
                 - addLocation
 
   trigger:
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     handler: src/trigger.handler

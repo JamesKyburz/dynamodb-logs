@@ -4,10 +4,13 @@
 
 const { prompt } = require('inquirer')
 const execa = require('execa')
+const chalk = require('chalk')
 
 async function cli () {
-  const shell = (command, opt) =>
-    execa.command(command, { shell: '/bin/bash', ...opt })
+  const shell = (command, opt) => {
+    console.log(chalk.cyan(`executing ${command}`))
+    return execa.command(command, { shell: '/bin/bash', ...opt })
+  }
 
   while (true) {
     const { option } = await prompt({
@@ -63,15 +66,15 @@ async function cli () {
       if (nodeOrPython === 'node') {
         if (option === 'start offline') {
           await shell(
-            'npx sls --stage=local -c serverless-node.yml offline start',
+            'npx sls offline start --stage=local -c serverless-node.yml',
             { stdio: 'inherit' }
           )
         } else if (option === 'deploy') {
-          await shell('npx sls -c serverless-node.yml --stage dev deploy', {
+          await shell('npx sls deploy --stage dev -c serverless-node.yml', {
             stdio: 'inherit'
           })
         } else if (option === 'remove deploy') {
-          await shell('npx sls -c serverless-node.yml --stage dev remove', {
+          await shell('npx sls remove,--stage dev -c serverless-node.yml', {
             stdio: 'inherit'
           })
         }
@@ -90,7 +93,7 @@ async function cli () {
           await shell(
             `
             . venv/bin/activate
-            npx sls --stage=local -c serverless-python.yml offline start
+            npx sls offline start --stage=local -c serverless-python.yml
           `,
             { stdio: 'inherit' }
           )
@@ -98,7 +101,7 @@ async function cli () {
           await shell(
             `
             . venv/bin/activate
-            npx sls -c serverless-python.yml --stage dev deploy
+            npx sls deploy --stage dev -c serverless-python.yml
           `,
             { stdio: 'inherit' }
           )
@@ -106,7 +109,7 @@ async function cli () {
           await shell(
             `
             . venv/bin/activate
-            npx sls -c serverless-python.yml --stage dev remove
+            npx sls remove --stage dev -c serverless-python.yml
           `,
             { stdio: 'inherit' }
           )

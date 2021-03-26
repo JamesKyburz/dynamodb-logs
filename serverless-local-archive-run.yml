@@ -16,24 +16,26 @@ provider:
   logRetentionInDays: 5
   tracing:
     lambda: true
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - xray:PutTelemetryRecords
-        - xray:PutTraceSegments
-      Resource: "*"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - xray:PutTelemetryRecords
+            - xray:PutTraceSegments
+          Resource: "*"
   lambdaHashingVersion: 20201221
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   eventBridge:
     useCloudFormation: true
   tags:
-    commit: '${env:COMMIT_ID}'
+    commit: "${env:COMMIT_ID}"
 
 functions:
   websocket:
     handler: src/websocket.handler
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     package:
@@ -61,7 +63,7 @@ functions:
     iamRoleStatementsInherit: true
   localReplay:
     handler: src/local-replay.handler
-    runtime: nodejs12.x
+    runtime: nodejs14.x
     timeout: 6
     memorySize: 128
     package:

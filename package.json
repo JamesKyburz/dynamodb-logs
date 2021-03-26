@@ -28,7 +28,7 @@
   "devDependencies": {
     "@commitlint/cli": "12.0.1",
     "@commitlint/config-conventional": "12.0.1",
-    "@mhlabs/evb-cli": "^1.1.31",
+    "@mhlabs/evb-cli": "1.1.34",
     "aws-sdk": "2.873.0",
     "chalk": "4.1.0",
     "commitizen": "4.2.3",
@@ -45,7 +45,7 @@
     "prettier-standard": "16.4.1",
     "serverless": "2.31.0",
     "serverless-dynamodb-local": "0.2.39",
-    "serverless-iam-roles-per-function": "3.1.0",
+    "serverless-iam-roles-per-function": "3.2.0-e97ab49",
     "serverless-offline": "6.9.0",
     "serverless-offline-aws-eventbridge": "1.5.2",
     "serverless-offline-dynamodb-streams": "4.2.0",

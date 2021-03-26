@@ -45,7 +45,7 @@ function cli() {
   else
     if [[ -z $(docker ps -q --filter 'name=dynamodb-logs-dynamodb') ]]; then
       docker-compose up -d
-      npx sls --stage=local -c dynamodb.local.yml dynamodb migrate
+      npx sls dynamodb migrate --stage=local -c dynamodb.local.yml
     fi
     export MSYS_NO_PATHCONV=1
 
@@ -60,6 +60,7 @@ function cli() {
       -e "AWS_CSM_ENABLED=true" \
       -e "AWS_CSM_PORT=31000" \
       -e "AWS_CSM_HOST=127.0.0.1" \
+      -e "SLS_DEBUG" \
       -e "COMMIT_ID=${commit_id:?}" \
       -e "HOME=/work/.home" \
       -e "COMPOSE_PROJECT_NAME=dynamodb-logs" \

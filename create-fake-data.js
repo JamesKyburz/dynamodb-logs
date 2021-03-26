@@ -103,7 +103,7 @@ run().catch(console.error)
 function createSignup () {
   const name = faker.name.findName()
   const email = faker.internet.email()
-  const id = faker.random.uuid()
+  const id = faker.datatype.uuid()
 
   return {
     pk: `users#${id}#stream`,

@@ -173,7 +173,7 @@ async function run () {
       const { stage } = await prompt({
         type: 'list',
         name: 'stage',
-        message: 'state?',
+        message: 'stage?',
         choices: ['dev', 'prod']
       })
       try {

@@ -16,8 +16,13 @@ function cli() {
   cp .bashrc .home/
 
   if [[ -f /.dockerenv ]]; then
-    log_error "You are already in docker :)"
-    return
+    if [[ "${1:-}" == "stop" ]]; then
+      docker-compose down
+      exit 0
+    else
+      log_error "You are already in docker :)"
+      return
+    fi
   fi
 
   running=$(docker ps -q --filter 'name=dynamodb-logs-cli')
@@ -57,6 +62,7 @@ function cli() {
       -e "AWS_CSM_HOST=127.0.0.1" \
       -e "COMMIT_ID=${commit_id:?}" \
       -e "HOME=/work/.home" \
+      -e "COMPOSE_PROJECT_NAME=dynamodb-logs" \
       -v "$(pwd)":/work \
       -v "$(pwd)/.bash_history:/root/.bash_history" \
       -v "$(pwd)/.bashrc:/root/.bashrc" \

@@ -6,6 +6,8 @@
   "keywords": [
     "lambda",
     "event-sourcing",
+    "eventbridge",
+    "eventbridge-archive",
     "dynamodb",
     "append only",
     "serverless",
@@ -15,6 +17,10 @@
   "author": "James Kyburz <james.kyburz@gmail.com>",
   "license": "Apache-2.0",
   "private": true,
+  "engines": {
+    "node": ">= 14",
+    "npm": ">= 7"
+  },
   "scripts": {
     "postinstall": "husky install",
     "prepare": "husky install"

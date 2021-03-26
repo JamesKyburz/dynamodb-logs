@@ -144,7 +144,7 @@ Query DynamoDB
 <details>
   <summary>generate fake user data</summary>
 
-generate fake user data locally or in aws
+Generate fake user data locally or in aws.
 
 ```sh
 ./create-fake-data.sh
@@ -155,27 +155,24 @@ generate fake user data locally or in aws
 <details>
   <summary>offline</summary>
 
-```sh
-docker-compose up -d
-npx sls --stage=local -c dynamodb.local.yml dynamodb migrate
-```
-
 ### Node.js
 
 ```sh
+./cli.sh
 npx sls --stage=local -c serverless-node.yml offline start
 ```
 
 ### Python
 
 ```sh
+./cli.sh
 virtualenv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
 npx sls --stage=local -c serverless-python.yml offline start
 ```
 
-Add item using aws cli
+Add item using aws cli.
 
 ```sh
 ./cli.sh
@@ -207,8 +204,12 @@ Query DynamoDB
 ./dynamodb-local-query.sh
 ```
 
+Cleanup
+
+Remove dynamodb data and docker-compose processes.
+
 ```sh
-docker-compose down
+./cli.sh stop
 ```
 
 </details>

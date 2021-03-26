@@ -104,18 +104,54 @@ async function run () {
     let written = 0
     const from = await datePrompt('Start date?')
     const to = await datePrompt('End date?')
+
+    const logs = await new Promise((resolve, reject) => {
+      db.all(
+        `select distinct log from events where createdAt >= ? and createdAt <= ?`,
+        from,
+        to,
+        (err, rows) => (err ? reject(err) : resolve(rows.map(row => row.log)))
+      )
+    })
+
+    const { filterLogs } = await prompt({
+      type: 'checkbox',
+      name: 'filterLogs',
+      message: 'log?',
+      choices: logs
+    })
+
+    const types = await new Promise((resolve, reject) => {
+      db.all(
+        `select distinct type from events where createdAt >= ? and createdAt <= ? and log in (?)`,
+        from,
+        to,
+        filterLogs,
+        (err, rows) => (err ? reject(err) : resolve(rows.map(row => row.type)))
+      )
+    })
+
+    const { filterTypes } = await prompt({
+      type: 'checkbox',
+      name: 'filterTypes',
+      message: 'type?',
+      choices: types
+    })
+
     while (true) {
       const limit = 10
       const rows = await new Promise((resolve, reject) => {
         db.all(
-          `select * from events where createdAt >= ? and createdAt <= ? limit ${limit} offset ${offset} `,
+          `select * from events where createdAt >= ? and createdAt <= ? and log in (?) and type in (?) limit ${limit} offset ${offset} `,
           from,
           to,
+          filterLogs,
+          filterTypes,
           (err, rows) => (err ? reject(err) : resolve(rows))
         )
       })
       if (!rows.length) break
-      const events = rows.map(row => JSON.parse(row.payload))
+      const events = rows.map(row => JSON.parse(row.event))
       written += await send(events)
       offset += limit
     }

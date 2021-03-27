@@ -48,6 +48,7 @@ async function run () {
   const ws = createWriteStream('./events.ldjson')
 
   const ids = []
+  const telephoneNumbers = {}
 
   await new Promise((resolve, reject) => {
     ws.on('error', reject)
@@ -60,12 +61,13 @@ async function run () {
         payload: { id }
       } = signup
       ids.push(id)
+      telephoneNumbers[id] = faker.phone.phoneNumber()
     }
-    for (const id of ids) {
-      ws.write(JSON.stringify(addPhoneNumber(id)) + EOL)
+    for (const [id, phoneNumber] of Object.entries(telephoneNumbers)) {
+      ws.write(JSON.stringify(addPhoneNumber(id, phoneNumber)) + EOL)
     }
-    for (const id of ids) {
-      ws.write(JSON.stringify(verifyPhoneNumber(id)) + EOL)
+    for (const [id, phoneNumber] of Object.entries(telephoneNumbers)) {
+      ws.write(JSON.stringify(verifyPhoneNumber(id, phoneNumber)) + EOL)
     }
     for (const id of ids) {
       ws.write(JSON.stringify(addLocation(id)) + EOL)
@@ -118,7 +120,7 @@ function createSignup () {
   }
 }
 
-function addPhoneNumber (id) {
+function addPhoneNumber (id, phoneNumber) {
   return {
     pk: `users#${id}#stream`,
     sk: 2,
@@ -126,19 +128,20 @@ function addPhoneNumber (id) {
     log: 'users',
     payload: {
       id,
-      phoneNumber: faker.phone.phoneNumber()
+      phoneNumber
     }
   }
 }
 
-function verifyPhoneNumber (id) {
+function verifyPhoneNumber (id, phoneNumber) {
   return {
     pk: `users#${id}#stream`,
     sk: 3,
     type: 'verifyPhoneNumber',
     log: 'users',
     payload: {
-      id
+      id,
+      phoneNumber
     }
   }
 }

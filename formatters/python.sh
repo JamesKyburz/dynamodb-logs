@@ -11,5 +11,5 @@ if [[ -n "${files:-}" ]]; then
     -i \
     -v "$(pwd)":/work \
     -w /work \
-    jameskyburz/ops-kitchen bash -c "black '${files:?}'"
+    jameskyburz/ops-kitchen bash -c "black ${files:?}"
 fi

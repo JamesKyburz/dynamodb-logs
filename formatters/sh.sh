@@ -11,5 +11,5 @@ if [[ -n "${files:-}" ]]; then
     -i \
     -v "$(pwd)":/work \
     -w /work \
-    jameskyburz/ops-kitchen bash -c "shfmt -l -i 2 -w '${files:?}'"
+    jameskyburz/ops-kitchen bash -c "shfmt -l -i 2 -w ${files:?}"
 fi

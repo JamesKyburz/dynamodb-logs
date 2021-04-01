@@ -78,7 +78,7 @@ async function run () {
   const pending = []
 
   for await (const { pk, sk, type, log, payload } of readEvents()) {
-    pending.push(
+    pending.push(() =>
       dynamodb
         .put({
           TableName: `${stage}-dynamodb-logs`,
@@ -93,11 +93,11 @@ async function run () {
         .promise()
     )
     if (pending.length > 20) {
-      await Promise.all(pending)
+      await Promise.all(pending.map(fn => fn()))
       pending.splice(0, pending.length)
     }
   }
-  await Promise.all(pending)
+  await Promise.all(pending.map(fn => fn()))
 }
 
 run().catch(console.error)

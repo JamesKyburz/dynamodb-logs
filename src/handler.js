@@ -10,7 +10,7 @@ exports.handler = async function user (event) {
     }
   } = event
 
-  console.log('products handler', JSON.stringify({ pk, sk, event }, null, 2))
+  console.log('core handler', JSON.stringify({ pk, sk, event }, null, 2))
 
   const dynamodb = new DynamoDB.DocumentClient({
     convertEmptyValues: true,
@@ -31,7 +31,7 @@ exports.handler = async function user (event) {
 
   const { Item: { version: currentVersion = 0 } = {} } = await dynamodb
     .get({
-      TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+      TableName: process.env.DYNAMODB_CORE_TABLE,
       Key: {
         pk: userPk,
         sk: userPk
@@ -88,7 +88,7 @@ function getEventHandler (dynamodb, pk, { type, payload: { id } }) {
     async signup ({ sk: version, payload: { name, email } }) {
       await dynamodb
         .put({
-          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          TableName: process.env.DYNAMODB_CORE_TABLE,
           Item: {
             pk,
             sk,
@@ -106,7 +106,7 @@ function getEventHandler (dynamodb, pk, { type, payload: { id } }) {
     async addPhoneNumber ({ sk: version, payload: { phoneNumber } }) {
       await dynamodb
         .update({
-          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          TableName: process.env.DYNAMODB_CORE_TABLE,
           ExpressionAttributeNames: {
             '#phoneNumber': 'phoneNumber',
             '#version': 'version'
@@ -130,7 +130,7 @@ function getEventHandler (dynamodb, pk, { type, payload: { id } }) {
     async verifyPhoneNumber ({ sk: version }) {
       await dynamodb
         .update({
-          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          TableName: process.env.DYNAMODB_CORE_TABLE,
           ExpressionAttributeNames: {
             '#verifiedPhoneNumber': 'verifiedPhoneNumber',
             '#version': 'version'
@@ -154,7 +154,7 @@ function getEventHandler (dynamodb, pk, { type, payload: { id } }) {
     async addLocation ({ sk: version, payload: { long, lat } }) {
       await dynamodb
         .update({
-          TableName: process.env.DYNAMODB_PRODUCTS_TABLE,
+          TableName: process.env.DYNAMODB_CORE_TABLE,
           ExpressionAttributeNames: {
             '#location': 'location',
             '#version': 'version'

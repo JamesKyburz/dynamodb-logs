@@ -94,7 +94,7 @@ functions:
     handler: src/handler.handler
     environment:
       DYNAMODB_LOGS_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
-      DYNAMODB_PRODUCTS_TABLE: "${opt:stage, 'local'}-products"
+      DYNAMODB_CORE_TABLE: "${opt:stage, 'local'}-core"
     package:
       patterns:
         - "!./**"
@@ -112,7 +112,7 @@ functions:
           - "dynamodb:PutItem"
           - "dynamodb:UpdateItem"
         Resource:
-          - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-products"
+          - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${opt:stage, 'local'}-core"
     iamRoleStatementsInherit: true
     events:
       - eventBridge:

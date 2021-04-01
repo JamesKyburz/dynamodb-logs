@@ -1,7 +1,7 @@
 Type: AWS::DynamoDB::Table
 
 Properties:
-  TableName: "${opt:stage, 'local'}-products"
+  TableName: "${opt:stage, 'local'}-core"
   BillingMode: "PAY_PER_REQUEST"
   AttributeDefinitions:
     - AttributeName: pk
@@ -20,4 +20,4 @@ Properties:
     PointInTimeRecoveryEnabled: true
   Tags:
     - Key: "dynamodb-table"
-      Value: "${opt:stage, 'local'}-products"
+      Value: "${opt:stage, 'local'}-core"

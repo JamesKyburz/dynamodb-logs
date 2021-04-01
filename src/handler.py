@@ -17,7 +17,7 @@ def handler(event, context):
     else:
         id = None
 
-    pprint({"products handler": event, "pk": pk, "sk": sk})
+    pprint({"core handler": event, "pk": pk, "sk": sk})
 
     config = {"api_version": "2012-08-10"}
     if os.getenv("IS_OFFLINE", ""):
@@ -31,7 +31,7 @@ def handler(event, context):
         )
 
     dynamodb = boto3.resource("dynamodb", **config)
-    products_table = dynamodb.Table(os.getenv("DYNAMODB_PRODUCTS_TABLE"))
+    core_table = dynamodb.Table(os.getenv("DYNAMODB_CORE_TABLE"))
     logs_table = dynamodb.Table(os.getenv("DYNAMODB_LOGS_TABLE"))
 
     if id:
@@ -39,15 +39,15 @@ def handler(event, context):
     else:
         user_pk = "#".join(pk.split("#")[0:-1])
 
-    products_response = products_table.get_item(
+    core_response = core_table.get_item(
         Key={"pk": user_pk, "sk": user_pk},
         ConsistentRead=True,
         ExpressionAttributeNames={"#version": "version"},
         ProjectionExpression="#version",
     )
 
-    if "Item" in products_response and "version" in products_response["Item"]:
-        current_version = products_response["Item"]["version"]
+    if "Item" in core_response and "version" in core_response["Item"]:
+        current_version = core_response["Item"]["version"]
     else:
         current_version = Decimal(0)
 
@@ -64,7 +64,7 @@ def handler(event, context):
                     f"current version is higher, will ignore {pk} {event['sk']} < {current_version}"
                 )
                 return {}
-            handler = get_event_handler(products_table, user_pk, event)
+            handler = get_event_handler(core_table, user_pk, event)
             if handler:
                 handler(event)
             else:
@@ -73,7 +73,7 @@ def handler(event, context):
     return {}
 
 
-def get_event_handler(products_table, pk, event):
+def get_event_handler(core_table, pk, event):
     type = event["type"]
     id = event["payload"]["id"]
     sk = pk
@@ -84,7 +84,7 @@ def get_event_handler(products_table, pk, event):
         email = payload["email"]
         version = event["sk"]
 
-        products_table.put_item(
+        core_table.put_item(
             Item={
                 "pk": pk,
                 "sk": sk,
@@ -102,7 +102,7 @@ def get_event_handler(products_table, pk, event):
         payload = event["payload"]
         phoneNumber = payload["phoneNumber"]
         version = event["sk"]
-        products_table.update_item(
+        core_table.update_item(
             ExpressionAttributeNames={
                 "#phoneNumber": "phoneNumber",
                 "#version": "version",
@@ -120,7 +120,7 @@ def get_event_handler(products_table, pk, event):
 
     def verify_phone_number(event):
         version = event["sk"]
-        products_table.update_item(
+        core_table.update_item(
             ExpressionAttributeNames={
                 "#verifiedPhoneNumber": "verifiedPhoneNumber",
                 "#version": "version",
@@ -141,7 +141,7 @@ def get_event_handler(products_table, pk, event):
         payload = event["payload"]
         long_ = payload["long"]
         lat = payload["lat"]
-        products_table.update_item(
+        core_table.update_item(
             ExpressionAttributeNames={"#location": "location", "#version": "version"},
             ExpressionAttributeValues={
                 ":location": {"long": long_, "lat": lat},

@@ -96,9 +96,9 @@ functions:
       DYNAMODB_LOGS_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
       DYNAMODB_PRODUCTS_TABLE: "${opt:stage, 'local'}-products"
     package:
-      exclude:
-        - ./**
-        - "!./src/handler.py"
+      patterns:
+        - "!./**"
+        - "./src/handler.py"
     iamRoleStatementsName: "dynamodb-logs-${opt:stage, 'local'}-event-handler"
     iamRoleStatements:
       - Effect: Allow
@@ -137,9 +137,9 @@ functions:
     memorySize: 128
     handler: src/trigger.handler
     package:
-      exclude:
-        - ./**
-        - "!src/trigger.py"
+      patterns:
+        - "!./**"
+        - "src/trigger.py"
     iamRoleStatementsName: "dynamodb-logs-${opt:stage, 'local'}-trigger"
     iamRoleStatements:
       - Effect: Allow

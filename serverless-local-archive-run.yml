@@ -39,9 +39,9 @@ functions:
     timeout: 6
     memorySize: 128
     package:
-      exclude:
-        - ./**
-        - "!./src/websocket.js"
+      patterns:
+        - "!./**"
+        - "./src/websocket.js"
     environment:
       allowed_ip: "${env:external_ip4_address}"
       DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
@@ -67,9 +67,9 @@ functions:
     timeout: 6
     memorySize: 128
     package:
-      exclude:
-        - ./**
-        - "!./src/local-replay.js"
+      patterns:
+        - "!./**"
+        - "./src/local-replay.js"
     environment:
       DYNAMODB_TABLE: "${opt:stage, 'local'}-dynamodb-logs"
     iamRoleStatementsName: "dynamodb-logs-local-archive-replay-${opt:stage, 'local'}-local-replay"

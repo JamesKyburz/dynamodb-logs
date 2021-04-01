@@ -87,11 +87,11 @@ functions:
     reservedConcurrency: 1
     handler: src/handler.handler
     package:
-      exclude:
-        - ./**
-        - "!./src/handler.js"
-        - "!package.json"
-        - "!node_modules"
+      patterns:
+        - "!./**"
+        - "./src/handler.js"
+        - "package.json"
+        - "node_modules"
     iamRoleStatementsName: "dynamodb-logs-${opt:stage, 'local'}-event-handler"
     iamRoleStatements:
       - Effect: Allow
@@ -130,11 +130,11 @@ functions:
     memorySize: 128
     handler: src/trigger.handler
     package:
-      exclude:
-        - ./**
-        - "!./src/trigger.js"
-        - "!package.json"
-        - "!node_modules"
+      patterns:
+        - "!./**"
+        - "./src/trigger.js"
+        - "package.json"
+        - "node_modules"
     iamRoleStatementsName: "dynamodb-logs-${opt:stage, 'local'}-trigger"
     iamRoleStatements:
       - Effect: Allow

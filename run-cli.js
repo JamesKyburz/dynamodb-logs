@@ -66,17 +66,32 @@ async function cli () {
       if (nodeOrPython === 'node') {
         if (option === 'start offline') {
           await shell(
-            'npx sls offline start --stage=local -c serverless-node.yml',
+            'npm exec sls offline start -- --stage=local -c serverless-node.yml',
             { stdio: 'inherit' }
           )
         } else if (option === 'deploy') {
-          await shell('npx sls deploy --stage dev -c serverless-node.yml', {
-            stdio: 'inherit'
-          })
+          await shell(
+            'npm exec sls deploy -- --stage dev -c serverless-node.yml',
+            {
+              stdio: 'inherit'
+            }
+          )
         } else if (option === 'remove deploy') {
-          await shell('npx sls remove,--stage dev -c serverless-node.yml', {
-            stdio: 'inherit'
-          })
+          await shell(
+            `
+            export external_ip4_address=unknown
+            npm exec sls remove -- --stage dev -c serverless-local-archive-run.yml
+            `,
+            {
+              stdio: 'inherit'
+            }
+          )
+          await shell(
+            'npm exec sls remove -- --stage dev -c serverless-node.yml',
+            {
+              stdio: 'inherit'
+            }
+          )
         }
       } else if (nodeOrPython === 'python') {
         await shell(
@@ -93,7 +108,7 @@ async function cli () {
           await shell(
             `
             . venv/bin/activate
-            npx sls offline start --stage=local -c serverless-python.yml
+            npm exec sls offline start -- --stage=local -c serverless-python.yml
           `,
             { stdio: 'inherit' }
           )
@@ -101,15 +116,24 @@ async function cli () {
           await shell(
             `
             . venv/bin/activate
-            npx sls deploy --stage dev -c serverless-python.yml
+            npm exec sls deploy -- --stage dev -c serverless-python.yml
           `,
             { stdio: 'inherit' }
           )
         } else if (option === 'remove deploy') {
           await shell(
             `
+            export external_ip4_address=unknown
+            npm exec sls remove -- --stage dev -c serverless-local-archive-run.yml
+            `,
+            {
+              stdio: 'inherit'
+            }
+          )
+          await shell(
+            `
             . venv/bin/activate
-            npx sls remove --stage dev -c serverless-python.yml
+            npm exec sls remove -- --stage dev -c serverless-python.yml
           `,
             { stdio: 'inherit' }
           )

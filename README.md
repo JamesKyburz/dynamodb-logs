@@ -100,7 +100,7 @@ export AWS credentials before running `cli.sh`
 ```sh
 npm i
 ./cli.sh
-npx sls deploy --stage dev -c serverless-node.yml
+npm exec sls deploy -- --stage dev -c serverless-node.yml
 ```
 
 ### Node.js remove stack in AWS
@@ -108,7 +108,7 @@ npx sls deploy --stage dev -c serverless-node.yml
 ```sh
 npm i
 ./cli.sh
-npx sls remove --stage dev -c serverless-node.yml
+npm exec sls remove -- --stage dev -c serverless-node.yml
 ```
 
 ### Python deploy to AWS
@@ -120,7 +120,7 @@ rm -rf venv
 virtualenv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
-npx sls deploy --stage dev -c serverless-python.yml
+npm exec sls deploy -- --stage dev -c serverless-python.yml
 rm -rf venv
 ```
 
@@ -129,7 +129,7 @@ rm -rf venv
 ```sh
 npm i
 ./cli.sh
-npx sls remove --stage dev -c serverless-python.yml
+npm exec sls remove -- --stage dev -c serverless-python.yml
 ```
 
 Query DynamoDB
@@ -159,7 +159,7 @@ Generate fake user data locally or in aws.
 
 ```sh
 ./cli.sh
-npx sls offline start --stage=local -c serverless-node.yml
+npm exec sls offline start -- --stage=local -c serverless-node.yml
 ```
 
 ### Python
@@ -169,7 +169,7 @@ npx sls offline start --stage=local -c serverless-node.yml
 virtualenv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
-npx sls offline start --stage=local -c serverless-python.yml
+npm exec sls offline start -- --stage=local -c serverless-python.yml
 ```
 
 Add item using aws cli.

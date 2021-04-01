@@ -193,13 +193,13 @@ async function run () {
             else
               export external_ip4_address="\${allowed_ip4_addresses:-},\${external_ip4_address:?}"
               log_info 'adding local ip4 ip address to websocket function'
-              npx sls -c serverless-local-archive-run.yml --stage dev deploy --function websocket
+              npm exec sls deploy -- -c serverless-local-archive-run.yml --stage dev --function websocket
               deploy_needed=0
             fi
           fi
           if [[ \${deploy_needed:?} -eq 1 ]]; then
             log_info 'deploy local archive replay stack'
-            npx sls -c serverless-local-archive-run.yml --stage dev deploy
+            npm exec sls deploy -- -c serverless-local-archive-run.yml --stage dev
           fi
         `,
           { stdio: 'inherit' }
@@ -232,7 +232,7 @@ async function run () {
       console.log(chalk.cyan(`will receive events via ${wssUrl}`))
       console.log(chalk.bold('select the local replay as the event target'))
       await shell(
-        `npx @mhlabs/evb-cli replay --eventbus dynamodb-log --rule-prefix dynamodb-logs-local-archive-replay -n ${replayName}`,
+        `npm exec @mhlabs/evb-cli replay -- --eventbus dynamodb-log --rule-prefix dynamodb-logs-local-archive-replay -n ${replayName}`,
         {
           stdio: 'inherit'
         }
@@ -255,7 +255,7 @@ async function run () {
     } else {
       console.log(chalk.bold('select event targets omitting local replay'))
       await shell(
-        `npx @mhlabs/evb-cli replay --eventbus dynamodb-log -n ${replayName}`,
+        `npm exec @mhlabs/evb-cli replay -- --eventbus dynamodb-log -n ${replayName}`,
         {
           stdio: 'inherit'
         }

@@ -45,7 +45,7 @@ function cli() {
   else
     if [[ -z $(docker ps -q --filter 'name=dynamodb-logs-dynamodb') ]]; then
       docker-compose up -d
-      npx sls dynamodb migrate --stage=local -c dynamodb.local.yml
+      npm exec sls dynamodb migrate -- --stage=local -c dynamodb.local.yml
     fi
     export MSYS_NO_PATHCONV=1
 

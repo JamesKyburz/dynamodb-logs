@@ -12,10 +12,7 @@ def handler(event, context):
     key = event["detail"]["key"]
     pk = key["pk"]
     sk = key["sk"]
-    if "payload" in event:
-        id = event["payload"]["id"]
-    else:
-        id = None
+    id = event["payload"]["id"]
 
     pprint({"core handler": event, "pk": pk, "sk": sk})
 
@@ -34,10 +31,7 @@ def handler(event, context):
     core_table = dynamodb.Table(os.getenv("DYNAMODB_CORE_TABLE"))
     logs_table = dynamodb.Table(os.getenv("DYNAMODB_LOGS_TABLE"))
 
-    if id:
-        user_pk = f"users#{id}"
-    else:
-        user_pk = "#".join(pk.split("#")[0:-1])
+    user_pk = f"users#{id}"
 
     core_response = core_table.get_item(
         Key={"pk": user_pk, "sk": user_pk},

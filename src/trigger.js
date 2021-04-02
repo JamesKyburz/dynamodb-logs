@@ -35,7 +35,15 @@ exports.handler = async function trigger (event) {
       const params = {
         Entries: batch.map(({ key, type, payload }) => {
           const detailWithPayload = JSON.stringify({ log, key, type, payload })
-          const detailLessPayload = JSON.stringify({ log, key, type })
+          const detailLessPayload = JSON.stringify({
+            log,
+            key,
+            type,
+            partial: true,
+            payload: {
+              id: payload.id
+            }
+          })
           return {
             EventBusName: 'dynamodb-log',
             Source: 'dynamodb-log',

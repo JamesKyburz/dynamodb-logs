@@ -81,7 +81,14 @@ def handler(event, context):
             cls=DecimalEncoder,
         )
         detail_less_payload = json.dumps(
-            {"log": log, "key": item["key"], "type": item["type"]}, cls=DecimalEncoder
+            {
+                "log": log,
+                "key": item["key"],
+                "type": item["type"],
+                "partial": true,
+                "payload": {"id": item["payload"]["id"]},
+            },
+            cls=DecimalEncoder,
         )
         if len(detail_with_payload) <= 10240:
             return detail_with_payload

@@ -6,7 +6,7 @@ exports.handler = async function user (event) {
   const {
     detail: {
       key: { sk, pk },
-      payload: { id } = {}
+      payload: { id }
     }
   } = event
 
@@ -22,12 +22,7 @@ exports.handler = async function user (event) {
     })
   })
 
-  const userPk = id
-    ? `users#${id}`
-    : pk
-        .split('#')
-        .slice(0, -1)
-        .join('#')
+  const userPk = `users#${id}`
 
   const { Item: { version: currentVersion = 0 } = {} } = await dynamodb
     .get({

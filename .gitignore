@@ -20,3 +20,4 @@ aws.sh
 db
 .prompt
 events.ldjson
+*.cast

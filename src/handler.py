@@ -9,10 +9,11 @@ from decimal import Decimal
 
 
 def handler(event, context):
-    key = event["detail"]["key"]
+    detail = event["detail"]
+    key = detail["key"]
     pk = key["pk"]
     sk = key["sk"]
-    id = event["payload"]["id"]
+    id = detail["payload"]["id"]
 
     pprint({"core handler": event, "pk": pk, "sk": sk})
 

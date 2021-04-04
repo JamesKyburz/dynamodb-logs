@@ -43,10 +43,6 @@ function cli() {
     log_info "docker exec to ${running:?}"
     docker exec -ti "${running:?}" bash
   else
-    if [[ -z $(docker ps -q --filter 'name=dynamodb-logs-dynamodb') ]]; then
-      docker-compose up -d
-      npm exec sls dynamodb migrate -- --stage=local -c dynamodb.local.yml
-    fi
     export MSYS_NO_PATHCONV=1
 
     docker run \

@@ -58,6 +58,17 @@ async function cli () {
       option === 'deploy' ||
       option === 'remove deploy'
     ) {
+      if (option === 'start offline') {
+        await shell(
+          `
+          if [[ -z $(docker ps -q --filter 'name=dynamodb-logs-dynamodb') ]]; then
+            docker-compose up -d
+            npm exec sls dynamodb migrate -- --stage=local -c dynamodb.local.yml
+          fi
+        `,
+          { stdio: 'inherit' }
+        )
+      }
       const { nodeOrPython } = await prompt({
         type: 'list',
         name: 'nodeOrPython',

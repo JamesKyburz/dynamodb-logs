@@ -85,7 +85,7 @@ def handler(event, context):
                 "log": log,
                 "key": item["key"],
                 "type": item["type"],
-                "partial": true,
+                "partial": True,
                 "payload": {"id": item["payload"]["id"]},
             },
             cls=DecimalEncoder,

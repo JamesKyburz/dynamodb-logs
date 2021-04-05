@@ -27,7 +27,7 @@ custom:
     region: us-east-1
     accessKeyId: x
     secretAccessKey: x
-    retryDelayMs: 500
+    retryDelayMs: 1600
     maximumRetryAttempts: 5
   csm:
     enabled:

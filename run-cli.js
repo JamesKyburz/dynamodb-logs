@@ -25,9 +25,10 @@ async function cli () {
         'remove deploy',
         'create fake data',
         'replay from archive',
-        'query local DynamoDB'
+        'query DynamoDB'
       ]
     })
+
     if (option === 'exit') {
       break
     } else if (option === 'local cleanup') {
@@ -154,8 +155,19 @@ async function cli () {
       await shell(`./create-fake-data.js`, { stdio: 'inherit' })
     } else if (option === 'replay from archive') {
       await shell(`./run-archive.js`, { stdio: 'inherit' })
-    } else if (option === 'query local DynamoDB') {
-      await shell(`./dynamodb-local-query.sh`, { stdio: 'inherit' })
+    } else if (option === 'query DynamoDB') {
+      const { env } = await prompt({
+        type: 'list',
+        name: 'env',
+        message: 'environment?',
+        choices: ['local', 'aws']
+      })
+
+      if (env === 'local') {
+        await shell(`./dynamodb-local-query.sh`, { stdio: 'inherit' })
+      } else if (env === 'aws') {
+        await shell('npm exec dynamodb-query', { stdio: 'inherit' })
+      }
     } else {
       await shell('bash', {
         stdio: 'inherit',

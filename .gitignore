@@ -21,3 +21,4 @@ db
 .prompt
 events.ldjson
 *.cast
+speakeasyjs/typescript

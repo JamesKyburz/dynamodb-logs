@@ -52,11 +52,13 @@ def handler(event, context):
         ExpressionAttributeValues={":pk": pk, ":sk": current_version},
     )
 
+    previous_version = current_version
+
     if "Items" in logs_response:
         for event in logs_response["Items"]:
-            if event["sk"] < current_version:
+            if event["sk"] != previous_version + 1:
                 print(
-                    f"current version is higher, will ignore {pk} {event['sk']} < {current_version}"
+                    f"missing events, expected {previous_version + 1} but got {event['sk']}"
                 )
                 return {}
             handler = get_event_handler(core_table, user_pk, event)
@@ -64,6 +66,7 @@ def handler(event, context):
                 handler(event)
             else:
                 print(f"no event handler found for type {event['type']}")
+            previous_version = event["sk"]
 
     return {}
 

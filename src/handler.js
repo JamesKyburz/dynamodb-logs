@@ -59,14 +59,15 @@ exports.handler = async function user (event) {
     return
   }
 
+  let previousVersion = currentVersion
+
   for (const event of logItems) {
-    if (event.sk < currentVersion) {
+    if (event.sk !== previousVersion + 1) {
       console.log(
-        `current version is higher, will ignore ${pk} ${event.sk} < ${currentVersion}`
+        `missing events expected ${previousVersion + 1} got ${event.sk}`
       )
       return
     }
-
     const handler = getEventHandler(dynamodb, userPk, event)
 
     if (!handler) {
@@ -74,6 +75,7 @@ exports.handler = async function user (event) {
     } else {
       await handler(event)
     }
+    previousVersion = event.sk
   }
 }
 

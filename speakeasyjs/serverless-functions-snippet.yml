@@ -1,0 +1,23 @@
+functions:
+  saveToLocalArchive:
+    ...
+  eventHandler:
+    ...
+    reservedConcurrency: 1
+    events:
+      - eventBridge:
+          ...
+          pattern:
+            source:
+              - "dynamodb-log"
+            detail-type:
+              - "stream changes"
+            detail:
+              ...
+
+  trigger:
+    ...
+    events:
+      - stream:
+          type: dynamodb
+          startingPosition: LATEST

@@ -2,7 +2,6 @@
 
 const chalk = require('chalk')
 const shell = require('./shell')
-const cat = require('./cat')
 
 module.exports = async () => chalk`
 ⚡ AWS Deploy

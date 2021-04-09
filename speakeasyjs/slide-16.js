@@ -1,8 +1,6 @@
 'use strict'
 
 const chalk = require('chalk')
-const shell = require('./shell')
-const cat = require('./cat')
 
 module.exports = async () => chalk`
 ⚡ Some access patterns
@@ -19,7 +17,7 @@ Read model builder processing events in order
 
 {bold Direct DynamoDB queries}
 
-{green ●} Query with a partition key and get all events in order (descending or ascending)
-{green ●} Query with a partition key and sort key > ? if sort key is known
-{green ●} If both the partition key and sort key are known use get
+{green ●} query with a partition key and get all events in order (descending or ascending)
+{green ●} query with a partition key and sort key > ? if sort key is known
+{green ●} if both the partition key and sort key are known use get
 `

@@ -4,7 +4,7 @@ const chalk = require('chalk')
 const me = require('./me')
 
 module.exports = async () => chalk`
-⚡ Thanks! 🚀🚀🚀🚀🚀🚀🚀🚀 🚀🚀🚀🚀🚀🚀🚀🚀 🙂
+⚡ Thanks SpeakeasyJS! 🚀🚀🚀🚀🚀🚀🚀🚀 🙂
 
 {cyanBright https://github.com/JamesKyburz/dynamodb-logs}
 
@@ -15,5 +15,5 @@ On twitter and github {cyanBright JamesKyburz}
 
 {bold npm run speakeasyjs}
 
-Thanks to {cyanBright https://asciinema.org/} too 🙂
+Thanks to {cyanBright https://asciinema.org/} too
 `

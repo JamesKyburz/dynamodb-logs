@@ -5,9 +5,9 @@ const chalk = require('chalk')
 module.exports = async () => chalk`
 😱 EventBridge constraints
 
-{green ●} Each item has a max size of 256KB
+{green ●} each item has a max size of 256KB
 
-Invocations and transactions per region are all softs limits
+Invocations and transactions per region are all soft limits
 
 {bold Event Bus}
 

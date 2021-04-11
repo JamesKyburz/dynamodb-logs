@@ -14,4 +14,6 @@ On twitter and github {cyanBright JamesKyburz}
 {cyanBright https://github.com/JamesKyburz/dynamodb-logs}
 
 You can run it yourself {bold npm run speakeasyjs} 🙂
+
+SpeakeasyJS April 2021
 `

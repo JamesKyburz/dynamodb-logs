@@ -15,6 +15,6 @@ These apply before invocation
 
 These apply after invocation
 
-{green ●} Max 3 attempts to call a AWS Lambda Function
+{green ●} max 3 attempts to call a AWS Lambda Function
 {green ●} DLQ / Destinations can be configured
 `

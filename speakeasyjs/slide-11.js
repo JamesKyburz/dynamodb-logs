@@ -1,7 +1,6 @@
 'use strict'
 
 const chalk = require('chalk')
-const cat = require('./cat')
 
 module.exports = async () => chalk`
 ⚡ Recap
@@ -16,5 +15,5 @@ These plugins make that possible using the serverless framework
 {green ●} serverless-offline-aws-eventbridge
 {green ●} serverless-plugin-conditional-functions
 
-And the debugging tool for EventBridge {cyanBright https://github.com/mhlabs/evb-cli} by the MatHem tech team.
+And the debugging tool for EventBridge {cyanBright https://github.com/mhlabs/evb-cli} by the MatHem tech team
 `

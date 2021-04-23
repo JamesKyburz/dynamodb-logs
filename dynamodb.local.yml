@@ -3,7 +3,7 @@ service: create-local-dynamodb-log-resources
 disabledDeprecations:
   - CLI_OPTIONS_SCHEMA
 
-frameworkVersion: ^2.37.0
+frameworkVersion: ^2.38.0
 
 plugins:
   - serverless-dynamodb-local

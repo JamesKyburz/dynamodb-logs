@@ -91,6 +91,21 @@ The lambda is then triggered which will publish the changed keys to [EventBridge
 </details>
 
 <details>
+  <summary>cli.sh</summary>
+
+### interactive cli script for both local and AWS
+
+```
+npm install
+```
+
+```sh
+./cli.sh
+```
+
+</details>
+
+<details>
   <summary>in AWS</summary>
 
 export AWS credentials before running `cli.sh`

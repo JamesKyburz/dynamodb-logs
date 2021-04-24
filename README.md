@@ -12,6 +12,8 @@ EventBridge reads
 
 ![EventBridge DynamoDB table (dynamodb-logs) reads][reads]
 
+[![Speakeasy JS](https://img.youtube.com/vi/jyITB37DXFs/0.jpg)](https://www.youtube.com/watch?v=jyITB37DXFs)
+
 ### why?
 
 I previously built [level-eventstore] and wanted the same benefits of append only logs, but using serverless.
@@ -27,9 +29,6 @@ We can preserve the item order when reading from DynamoDB using a sort key.
 ### license
 
 [Apache License, Version 2.0](LICENSE)
-
-<details>
-  <summary>design</summary>
 
 ### writing to DynamoDB
 
@@ -101,6 +100,16 @@ npm install
 
 ```sh
 ./cli.sh
+```
+
+</details>
+<details>
+<summary>Speakeasy JS</summary>
+
+### [Speakeasy JS][speakeasyjs]
+
+```sh
+  npm run speakeasyjs
 ```
 
 </details>

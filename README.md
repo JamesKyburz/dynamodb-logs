@@ -12,6 +12,10 @@ EventBridge reads
 
 ![EventBridge DynamoDB table (dynamodb-logs) reads][reads]
 
+### [Speakeasy JS][speakeasyjs]
+
+Here is the Speakeasy JS video from April 2021.
+
 [![Speakeasy JS](https://img.youtube.com/vi/jyITB37DXFs/1.jpg)](https://www.youtube.com/watch?v=jyITB37DXFs)
 
 ### why?
@@ -333,6 +337,7 @@ Events can be replayed to EventBridge or DynamoDB, you can also replay events fr
 
 </details>
 
+[speakeasyjs]: https://speakeasyjs.com
 [writes]: ./diagrams/writes.png
 [reads]: ./diagrams/reads.png
 [eventbridge]: https://aws.amazon.com/eventbridge/

@@ -12,7 +12,7 @@ EventBridge reads
 
 ![EventBridge DynamoDB table (dynamodb-logs) reads][reads]
 
-[![Speakeasy JS](https://img.youtube.com/vi/jyITB37DXFs/0.jpg)](https://www.youtube.com/watch?v=jyITB37DXFs)
+[![Speakeasy JS](https://img.youtube.com/vi/jyITB37DXFs/1.jpg)](https://www.youtube.com/watch?v=jyITB37DXFs)
 
 ### why?
 

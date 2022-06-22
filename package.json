@@ -54,7 +54,7 @@
     "serverless-offline-dynamodb-streams": "4.2.0",
     "serverless-plugin-conditional-functions": "1.0.5",
     "serverless-python-requirements": "5.1.1",
-    "sqlite3": "5.0.2",
+    "sqlite3": "5.0.3",
     "ws": "7.4.5"
   },
   "lint-staged": {
